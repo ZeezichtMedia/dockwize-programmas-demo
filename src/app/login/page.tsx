@@ -37,7 +37,6 @@ const heroQuotes = [
 const demoUsers = [
   { id: "u_marleen", role: "Ondernemer", subtitle: "De Werkbrand" },
   { id: "u_hans", role: "Coach", subtitle: "Groeicoach" },
-  { id: "u_imro", role: "Programmamanager", subtitle: "Jouw Programma" },
   { id: "u_joanne", role: "Coördinator", subtitle: "Admin" },
   { id: "u_pascal", role: "Manager", subtitle: "Super-admin" },
 ];

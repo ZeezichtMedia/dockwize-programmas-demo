@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  Activity,
   Building2,
   ClipboardList,
   GraduationCap,
@@ -240,9 +239,8 @@ export default function DashboardPage() {
         </Card>
 
         {/* Compliance footer */}
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2">
           <ComplianceItem icon={ShieldCheck} title="AVG compliant" body="EU-data residency, encryptie at-rest, RLS-isolatie per ondernemer" />
-          <ComplianceItem icon={Activity} title="100% uptime deze maand" body="Geen incidenten · 99.97% laatste 30 dagen" />
           <ComplianceItem icon={Folder} title={`${totalContent} materialen, ${totalCoaches} coaches`} body={`Bibliotheek up-to-date. Laatste publicatie ${relativeTime(library[library.length-1].publishedAt)}.`} />
         </div>
       </div>

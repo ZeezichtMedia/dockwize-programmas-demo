@@ -25,7 +25,7 @@ const roleLabels: Record<string, string> = {
   super_admin: "Manager",
 };
 
-const demoOrder = ["u_marleen", "u_jeroen", "u_hans", "u_nicola", "u_imro", "u_joanne", "u_jordi", "u_pascal", "u_marlon"];
+const demoOrder = ["u_marleen", "u_hans", "u_joanne", "u_pascal"];
 
 export function RoleSwitcher() {
   const { user, signOut, setUserId } = useAuth();
