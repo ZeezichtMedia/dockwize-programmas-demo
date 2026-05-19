@@ -10,7 +10,7 @@ export const channels: ChatChannel[] = [
       "u_marleen", "u_jeroen", "u_aisha", "u_bram", "u_chantal", "u_finn",
       "u_isabel", "u_omar", "u_sanne", "u_imro", "u_hans", "u_nicola",
     ],
-    description: "Alle deelnemers + coaches van Jouw Programma 7.",
+    description: "Alle deelnemers en coaches van Jouw Programma voorjaar 2026.",
     createdAt: "2026-04-08T08:00:00Z",
   },
   {
@@ -59,7 +59,7 @@ export const messages: ChatMessage[] = [
     channelId: "ch_jp7_general",
     authorId: "u_imro",
     content:
-      "Welkom allemaal in Jouw Programma 7! Stel jezelf even voor in 2 zinnen — wie ben je, wat doe je, wat zoek je in dit programma?",
+      "Welkom allemaal in Jouw Programma voorjaar 2026. Stel jezelf even voor in 2 zinnen. Wie ben je, wat doe je, wat zoek je in dit programma?",
     timestamp: "2026-04-08T09:15:00Z",
     reactions: { "👋": ["u_marleen", "u_jeroen", "u_aisha", "u_bram", "u_chantal"] },
   },

@@ -8,10 +8,11 @@ import {
   ClipboardList,
   GraduationCap,
   Library,
+  Sliders,
   Sparkles,
+  TrendingDown,
   TrendingUp,
   Users,
-  Zap,
   Folder,
   Archive,
   ShieldCheck,
@@ -27,6 +28,15 @@ import { users, getUser, entrepreneursIn } from "@/lib/mock/users";
 import { cohorts, programs } from "@/lib/mock/programs";
 import { workfolders } from "@/lib/mock/workfolders";
 import { library } from "@/lib/mock/library";
+import {
+  kpisForProgram,
+  overallStatusForProgram,
+  statusLabel,
+  statusTone,
+  formatKpiValue,
+  formatKpiTarget,
+  type KpiTarget,
+} from "@/lib/mock/kpis";
 import { relativeTime, cn } from "@/lib/utils";
 
 export default function DashboardPage() {
@@ -91,71 +101,62 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Programma's voortgang */}
+          {/* KPI's per groep */}
           <Card data-tour="dashboard-progress" className="lg:col-span-2">
             <CardHeader className="flex-row items-center justify-between">
               <div>
-                <CardTitle>Programma-voortgang</CardTitle>
-                <p className="text-[12px] text-[var(--color-ink-3)]">Hoe ver elk lopend cohort is.</p>
+                <CardTitle>KPI's per groep</CardTitle>
+                <p className="text-[12px] text-[var(--color-ink-3)]">Targets die je per programma instelt, met de status van vandaag.</p>
               </div>
-              <Badge variant="default">Live data</Badge>
+              <Button variant="secondary" size="sm" asChild>
+                <Link href="/admin/programmas">
+                  <Sliders className="size-3.5" /> Targets aanpassen
+                </Link>
+              </Button>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               {cohorts.filter((c) => c.state === "active").map((c) => {
                 const program = programs.find((p) => p.id === c.programId)!;
                 const members = entrepreneursIn(c.id);
-                const cohortFolders = workfolders.filter((wf) => wf.cohortId === c.id);
-                const total = cohortFolders.reduce((s, wf) => s + wf.assignments.length, 0);
-                const done = cohortFolders.reduce((s, wf) => s + wf.assignments.filter((a) => a.status === "done").length, 0);
-                const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-
-                const start = new Date(c.startDate);
-                const end = new Date(c.endDate);
-                const today = new Date("2026-05-08");
-                const timePct = Math.round(((today.getTime() - start.getTime()) / (end.getTime() - start.getTime())) * 100);
+                const kpis = kpisForProgram(program.id, c.id);
+                const overall = overallStatusForProgram(program.id, c.id);
+                const tone = statusTone[overall];
 
                 return (
-                  <div key={c.id} className="rounded-[12px] border border-[var(--color-border)] p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
+                  <div key={c.id} className={cn("rounded-[12px] border p-4", tone.border, tone.bg)}>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
                           <p className="text-[14px] font-semibold">{c.name}</p>
-                          <Badge variant="default">{program.shortName}</Badge>
+                          <Badge variant="default" className="bg-white/70">{program.shortName}</Badge>
+                          <span className={cn("inline-flex items-center gap-1.5 rounded-full bg-white px-2 py-0.5 text-[10.5px] font-medium", tone.text)}>
+                            <span className={cn("size-1.5 rounded-full", tone.dot)} />
+                            {statusLabel[overall]}
+                          </span>
                         </div>
                         <p className="mt-0.5 text-[11.5px] text-[var(--color-ink-3)]">
                           {members.length} deelnemers · loopt tot {new Date(c.endDate).toLocaleDateString("nl-NL", { day: "numeric", month: "long" })}
                         </p>
                       </div>
-                      <div className="flex -space-x-2">
+                      <div className="flex -space-x-2 self-end sm:self-start">
                         {members.slice(0, 5).map((m) => (
-                          <div key={m.id} className="rounded-full ring-2 ring-[var(--color-surface)]">
+                          <div key={m.id} className="rounded-full ring-2 ring-white">
                             <div className={cn("flex size-7 items-center justify-center rounded-full bg-gradient-to-br text-[10px] font-semibold text-white", m.gradient ?? "from-zinc-400 to-zinc-600")}>
                               {m.initials ?? m.name[0]}
                             </div>
                           </div>
                         ))}
                         {members.length > 5 && (
-                          <div className="flex size-7 items-center justify-center rounded-full bg-[var(--color-surface-2)] text-[10px] font-semibold text-[var(--color-ink-2)] ring-2 ring-[var(--color-surface)]">
+                          <div className="flex size-7 items-center justify-center rounded-full bg-white text-[10px] font-semibold text-[var(--color-ink-2)] ring-2 ring-white">
                             +{members.length - 5}
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                      <div>
-                        <div className="mb-1 flex items-center justify-between text-[11px]">
-                          <span className="text-[var(--color-ink-3)]">Opdrachten af</span>
-                          <span className="font-medium text-[var(--color-ink)]">{pct}%</span>
-                        </div>
-                        <Progress value={pct} indicatorClassName="bg-[var(--color-accent)]" />
-                      </div>
-                      <div>
-                        <div className="mb-1 flex items-center justify-between text-[11px]">
-                          <span className="text-[var(--color-ink-3)]">Tijd verstreken</span>
-                          <span className="font-medium text-[var(--color-ink)]">{timePct}%</span>
-                        </div>
-                        <Progress value={timePct} indicatorClassName="bg-[var(--color-ink)]" />
-                      </div>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {kpis.map((k) => (
+                        <KpiBlock key={k.id} kpi={k} />
+                      ))}
                     </div>
                   </div>
                 );
@@ -171,7 +172,8 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-1.5">
                 <QuickAction icon={Users} label="Nieuwe ondernemer toevoegen" href="/admin/users" />
-                <QuickAction icon={GraduationCap} label="Cohort openen" href="/admin/cohorts" />
+                <QuickAction icon={GraduationCap} label="Groep openen" href="/admin/cohorts" />
+                <QuickAction icon={Sliders} label="KPI-targets aanpassen" href="/admin/programmas" />
                 <QuickAction icon={Library} label="Content publiceren" href="/admin/content" />
                 <QuickAction icon={Archive} label="Retentie controleren" href="/admin/retentie" />
                 <QuickAction icon={ClipboardList} label="Audit log" href="/admin/audit" />
@@ -309,5 +311,27 @@ function ComplianceItem({ icon: Icon, title, body }: { icon: React.ComponentType
         <p className="mt-0.5 text-[11.5px] text-[var(--color-ink-3)]">{body}</p>
       </div>
     </Card>
+  );
+}
+
+function KpiBlock({ kpi }: { kpi: KpiTarget }) {
+  const tone = statusTone[kpi.status];
+  return (
+    <div className="rounded-[10px] border border-white/60 bg-white/70 p-3">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[11.5px] font-medium text-[var(--color-ink-2)]">{kpi.label}</p>
+        <span className={cn("size-1.5 shrink-0 rounded-full mt-1.5", tone.dot)} />
+      </div>
+      <div className="mt-1.5 flex items-baseline gap-2">
+        <p className="text-[18px] font-semibold tracking-tight text-[var(--color-ink)]">{formatKpiValue(kpi)}</p>
+        <p className="text-[10.5px] text-[var(--color-muted)]">target {formatKpiTarget(kpi)}</p>
+      </div>
+      {kpi.trend !== undefined && kpi.trend !== 0 && (
+        <p className={cn("mt-1 flex items-center gap-1 text-[10.5px]", kpi.trend > 0 ? "text-[var(--color-success)]" : "text-[var(--color-danger)]")}>
+          {kpi.trend > 0 ? <TrendingUp className="size-2.5" /> : <TrendingDown className="size-2.5" />}
+          {kpi.trend > 0 ? "+" : ""}{kpi.trend}% t.o.v. vorige week
+        </p>
+      )}
+    </div>
   );
 }

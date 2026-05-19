@@ -74,7 +74,7 @@ export const cohorts: Cohort[] = [
   {
     id: "c_jp7",
     programId: "p_jouw",
-    name: "Jouw Programma 7",
+    name: "Jouw Programma · voorjaar 2026",
     startDate: "2026-04-08",
     endDate: "2026-06-30",
     memberIds: ["u_marleen", "u_jeroen", "u_aisha", "u_bram", "u_chantal", "u_finn", "u_isabel", "u_omar", "u_sanne"],
@@ -84,7 +84,7 @@ export const cohorts: Cohort[] = [
   {
     id: "c_jp6",
     programId: "p_jouw",
-    name: "Jouw Programma 6",
+    name: "Jouw Programma · winter 2026",
     startDate: "2026-01-13",
     endDate: "2026-03-30",
     memberIds: [],
@@ -94,7 +94,7 @@ export const cohorts: Cohort[] = [
   {
     id: "c_groei3",
     programId: "p_groei",
-    name: "Groei #3",
+    name: "Groeiprogramma · editie 3",
     startDate: "2026-03-01",
     endDate: "2026-09-01",
     memberIds: [],

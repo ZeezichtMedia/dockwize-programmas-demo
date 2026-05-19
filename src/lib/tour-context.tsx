@@ -64,7 +64,7 @@ const stepsByRole: Record<Role, TourStep[]> = {
       title: "Hoi, ik loop even mee.",
       body: (
         <>
-          Je kijkt nu mee als <strong>Marleen</strong>, een verzonnen ondernemer in Jouw Programma 7. In een minuutje laat ik zien wat de plekken doen. Loopt iets niet lekker? App Jorian even.
+          Je kijkt nu mee als <strong>Marleen</strong>, een verzonnen ondernemer in Jouw Programma voorjaar 2026. In een minuutje laat ik zien wat de plekken doen. Loopt iets niet lekker? App Jorian even.
         </>
       ),
       primaryActionLabel: "Loop maar mee",
@@ -249,7 +249,7 @@ const stepsByRole: Record<Role, TourStep[]> = {
       title: "Vier cijfers, één blik",
       body: (
         <>
-          Hoeveel cohorts loopt er, hoeveel mensen doen mee, wachten er inleveringen op een coach, en wie is een week stil. Genoeg om de week mee te starten.
+          Hoeveel groepen lopen er, hoeveel mensen doen mee, wachten er inleveringen op een coach, en wie is een week stil. Genoeg om de week mee te starten.
         </>
       ),
     },
@@ -258,10 +258,10 @@ const stepsByRole: Record<Role, TourStep[]> = {
       target: "pm-cohorts",
       page: "/programma-manager",
       placement: "top",
-      title: "Mijn cohorts in beeld",
+      title: "Mijn groepen in beeld",
       body: (
         <>
-          Per lopende cohort zie je de voortgang, de eerstvolgende sessie en deadline. Geen losse mailtjes meer over wie wanneer wat moet bekijken.
+          Per lopende groep zie je de voortgang, de eerstvolgende sessie en deadline. Geen losse mailtjes meer over wie wanneer wat moet bekijken.
         </>
       ),
     },
@@ -311,7 +311,7 @@ const stepsByRole: Record<Role, TourStep[]> = {
       title: "De beheerkant",
       body: (
         <>
-          Alles wat te maken heeft met inrichten en bijhouden. Ondernemers, cohorts, content, rechten, retentie, audit. Geen werkmap-inhoud zelf.
+          Alles wat te maken heeft met inrichten en bijhouden. Ondernemers, groepen, content, rechten, retentie, audit. Geen werkmap-inhoud zelf.
         </>
       ),
     },
@@ -323,7 +323,7 @@ const stepsByRole: Record<Role, TourStep[]> = {
       title: "Wat moet vandaag aandacht?",
       body: (
         <>
-          Hoeveel ondernemers actief, hoeveel cohorts lopen, wie is een week stil. Helder bovenaan zodat niets blijft hangen.
+          Hoeveel ondernemers actief, hoeveel groepen lopen, wie is een week stil. Helder bovenaan zodat niets blijft hangen.
         </>
       ),
     },
@@ -409,7 +409,7 @@ const stepsByRole: Record<Role, TourStep[]> = {
       title: "Vier cijfers, één blik",
       body: (
         <>
-          Hoeveel ondernemers actief, hoeveel cohorts lopen, wat is de gemiddelde voortgang, en hoeveel vragen krijgt de bibliotheek-hulp. AI-gebruik is een mooie groei-indicator van het programma.
+          Hoeveel ondernemers actief, hoeveel groepen lopen, wat is de gemiddelde voortgang, en hoeveel vragen krijgt de bibliotheek-hulp. AI-gebruik is een mooie groei-indicator van het programma.
         </>
       ),
     },

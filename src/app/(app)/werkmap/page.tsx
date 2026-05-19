@@ -30,6 +30,10 @@ import { Progress } from "@/components/ui/progress";
 import { FileIcon } from "@/components/file-icon";
 import { StatusBadge } from "@/components/status-badge";
 import { EmptyState } from "@/components/empty-state";
+import { EntrepreneurCoachAwayBanner } from "@/components/coach-away-banner";
+import { SessionProposalCard } from "@/components/session-proposal-card";
+import { openProposalForEntrepreneur } from "@/lib/mock/sessions";
+import { TeamMembersCard } from "@/components/team-members-card";
 import { useUser } from "@/lib/auth-context";
 import { getFolderForEntrepreneur } from "@/lib/mock/workfolders";
 import { getUser } from "@/lib/mock/users";
@@ -71,6 +75,7 @@ export default function WerkmapPage() {
   const progress = Math.round((doneCount / folder.assignments.length) * 100);
 
   const folders = Array.from(new Set(folder.files.map((f) => f.folder).filter(Boolean))) as string[];
+  const openProposal = openProposalForEntrepreneur(user.id);
 
   const filesShown = folder.files.filter((f) => {
     if (activeFolder && f.folder !== activeFolder) return false;
@@ -158,6 +163,11 @@ export default function WerkmapPage() {
       </div>
 
       <div className="p-6">
+        {coach.availability?.status === "away" && (
+          <div className="mb-4">
+            <EntrepreneurCoachAwayBanner coach={coach} />
+          </div>
+        )}
         <Tabs defaultValue="overzicht" className="w-full">
           <TabsList data-tour="werkmap-tabs">
             <TabsTrigger value="overzicht">Overzicht</TabsTrigger>
@@ -170,6 +180,7 @@ export default function WerkmapPage() {
 
           {/* Overzicht */}
           <TabsContent value="overzicht" className="space-y-6">
+            {openProposal && <SessionProposalCard proposal={openProposal} />}
             <div className="grid gap-5 lg:grid-cols-3">
               <Card className="lg:col-span-2">
                 <CardHeader className="flex-row items-center justify-between gap-2">
@@ -221,6 +232,8 @@ export default function WerkmapPage() {
                 </CardContent>
               </Card>
             </div>
+
+            <TeamMembersCard guests={folder.guests ?? []} entrepreneurFirstName={user.name.split(" ")[0]} />
 
             <Card>
               <CardHeader className="flex-row items-center justify-between gap-2">

@@ -5,3 +5,5 @@ export * from "./library";
 export * from "./chats";
 export * from "./notifications";
 export * from "./ai";
+export * from "./kpis";
+export * from "./sessions";

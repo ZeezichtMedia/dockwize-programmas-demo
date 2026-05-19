@@ -30,7 +30,7 @@ const retentionPolicies = [
 
 export default function AdminRetentiePage() {
   const jp5 = {
-    name: "Jouw Programma 5",
+    name: "Jouw Programma · najaar 2025",
     members: 14,
     archiveDate: "2026-05-22",
     daysUntil: 14,
@@ -68,8 +68,8 @@ export default function AdminRetentiePage() {
         <Card>
           <CardHeader className="flex-row items-center justify-between gap-2">
             <div>
-              <CardTitle>Beleid per cohort</CardTitle>
-              <p className="text-[12px] text-[var(--color-ink-3)]">Stel per cohort in hoelang werkmappen na afloop bewaard blijven.</p>
+              <CardTitle>Beleid per groep</CardTitle>
+              <p className="text-[12px] text-[var(--color-ink-3)]">Stel per groep in hoelang werkmappen na afloop bewaard blijven.</p>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -129,7 +129,7 @@ export default function AdminRetentiePage() {
               {[
                 {
                   title: "Programma sluit af",
-                  body: "Op de einddatum gaat een cohort over naar de status 'afgerond'. Werkmappen blijven gewoon bereikbaar.",
+                  body: "Op de einddatum gaat een groep over naar de status 'afgerond'. Werkmappen blijven gewoon bereikbaar.",
                 },
                 {
                   title: "Notificatie 14 dagen voor archief",

@@ -119,7 +119,7 @@ export default function CohortPage() {
             <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
               <Card className="h-fit p-3">
                 <p className="px-2 pb-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-[var(--color-muted)]">
-                  Cohort kanalen
+                  Groepskanalen
                 </p>
                 <div className="space-y-0.5">
                   {channels

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, Download, ExternalLink, FileText, Lock, Send, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Calendar, CalendarDays, CalendarPlus, Check, Download, ExternalLink, FileText, Lock, Send, ShieldCheck } from "lucide-react";
 import { Topbar } from "@/components/topbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,6 +19,8 @@ import { useUser } from "@/lib/auth-context";
 import { getFolderForEntrepreneur } from "@/lib/mock/workfolders";
 import { getUser } from "@/lib/mock/users";
 import { getCohort, getProgram } from "@/lib/mock/programs";
+import { proposalsForEntrepreneur } from "@/lib/mock/sessions";
+import { SessionProposalDialog } from "@/components/session-proposal-dialog";
 import { formatBytes, relativeTime, cn } from "@/lib/utils";
 
 export default function CoachDetailPage() {
@@ -43,6 +45,10 @@ export default function CoachDetailPage() {
   const done = folder.assignments.filter((a) => a.status === "done").length;
   const progress = Math.round((done / folder.assignments.length) * 100);
   const submittedAssignment = folder.assignments.find((a) => a.status === "submitted");
+  const proposals = proposalsForEntrepreneur(entId);
+  const openProposal = proposals.find((p) => p.status === "proposed" || p.status === "alternatives_requested");
+  const acceptedProposal = proposals.find((p) => p.status === "accepted");
+  const [proposalDialogOpen, setProposalDialogOpen] = React.useState(false);
 
   return (
     <>
@@ -82,10 +88,42 @@ export default function CoachDetailPage() {
                 <p className="mt-1.5 text-right text-[10.5px] text-[var(--color-muted)]">{done} / {folder.assignments.length} af</p>
               </div>
             </div>
-            <Button size="sm"><Send className="size-3.5" /> Stuur bericht</Button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button size="sm" variant="secondary" onClick={() => setProposalDialogOpen(true)}>
+                <CalendarPlus className="size-3.5" /> 1-op-1 voorstellen
+              </Button>
+              <Button size="sm"><Send className="size-3.5" /> Stuur bericht</Button>
+            </div>
           </div>
         </div>
+
+        {(openProposal || acceptedProposal) && (
+          <div className="mt-4">
+            {openProposal && (
+              <div className="rounded-[10px] border border-amber-200 bg-amber-50/60 px-3 py-2 text-[12px] text-amber-900 flex items-center gap-2">
+                <Calendar className="size-3.5" />
+                <span>
+                  Voorstel verstuurd voor <strong>{new Date(openProposal.primarySlot).toLocaleDateString("nl-NL", { day: "numeric", month: "long" })}</strong>. {openProposal.status === "alternatives_requested" ? "Ondernemer vraagt om alternatieven, wacht op keuze." : "Wacht op bevestiging."}
+                </span>
+              </div>
+            )}
+            {acceptedProposal && (
+              <div className="rounded-[10px] border border-emerald-200 bg-emerald-50/60 px-3 py-2 text-[12px] text-emerald-900 flex items-center gap-2">
+                <Check className="size-3.5" />
+                <span>
+                  1-op-1 bevestigd: <strong>{new Date(acceptedProposal.acceptedSlot!).toLocaleString("nl-NL", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}</strong> · {acceptedProposal.location}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      <SessionProposalDialog
+        open={proposalDialogOpen}
+        onOpenChange={setProposalDialogOpen}
+        entrepreneurName={ent.name}
+      />
 
       <div className="p-6">
         <Tabs defaultValue="opdrachten" className="w-full">

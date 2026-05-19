@@ -17,9 +17,9 @@ export default function CohortsPage() {
   return (
     <>
       <Topbar
-        title="Cohorts"
-        subtitle="Beheer alle lopende, geplande en afgeronde cohorts"
-        action={<Button size="sm"><Plus className="size-4" /> Nieuw cohort</Button>}
+        title="Groepen"
+        subtitle="Beheer alle lopende, geplande en afgeronde groepen"
+        action={<Button size="sm"><Plus className="size-4" /> Nieuwe groep</Button>}
       />
       <div className="space-y-4 p-6">
         {cohorts.map((c) => {

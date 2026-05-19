@@ -145,7 +145,7 @@ export default function AdminUsersPage() {
             <div className="grid grid-cols-[2fr_1.5fr_1fr_1.2fr_120px_60px] items-center gap-4">
               <span>Naam</span>
               <span>Bedrijf</span>
-              <span>Cohort</span>
+              <span>Groep</span>
               <span>Coach</span>
               <span>Toegevoegd</span>
               <span></span>
@@ -230,7 +230,7 @@ export default function AdminUsersPage() {
           <p className="text-[12px] text-[var(--color-ink-2)]">
             <span className="font-medium text-[var(--color-ink)]">Tip:</span> nieuwe ondernemers vanuit
             HubSpot verschijnen automatisch bovenaan zodra Jordi het contract op &lsquo;getekend&rsquo;
-            zet. Klik op <strong>Werkmap aanmaken</strong> om in 1 stap cohort + coach toe te wijzen.
+            zet. Klik op <strong>Werkmap aanmaken</strong> om in 1 stap groep en coach toe te wijzen.
           </p>
         </div>
       </div>

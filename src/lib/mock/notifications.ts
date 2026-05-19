@@ -69,7 +69,7 @@ export const notifications: Notification[] = [
     id: "n7",
     userId: "u_joanne",
     type: "system",
-    title: "Retentie-notificatie — Jouw Programma 5",
+    title: "Retentie-notificatie: Jouw Programma najaar 2025",
     body: "9 werkmappen worden over 14 dagen gearchiveerd. Bekijk overzicht.",
     link: "/admin/retentie",
     read: false,
@@ -90,7 +90,7 @@ export const notifications: Notification[] = [
     id: "n9",
     userId: "u_pascal",
     type: "system",
-    title: "Wekelijks rapport, Jouw Programma 7",
+    title: "Wekelijks rapport · Jouw Programma voorjaar 2026",
     body: "9 actieve deelnemers · 2 inleveringen open · 1 deelnemer 7+ dagen inactief.",
     link: "/dashboard",
     read: false,
@@ -112,7 +112,7 @@ export const notifications: Notification[] = [
     userId: "u_pascal",
     type: "system",
     title: "Audit log signaal",
-    body: "Joanne plande retentie voor 14 werkmappen van Jouw Programma 5. Bekijk audit log voor details.",
+    body: "Joanne plande retentie voor 14 werkmappen van Jouw Programma najaar 2025. Bekijk audit log voor details.",
     link: "/admin/audit",
     read: false,
     fromUserId: "u_joanne",
@@ -215,7 +215,7 @@ export const notifications: Notification[] = [
     userId: "u_marlon",
     type: "system",
     title: "Pascal publiceerde nieuwe content",
-    body: "5 nieuwe video's voor Jouw Programma 7 deze week.",
+    body: "5 nieuwe video's voor Jouw Programma voorjaar 2026 deze week.",
     link: "/admin/content",
     read: true,
     fromUserId: "u_pascal",
@@ -493,14 +493,16 @@ export const auditLog: AuditEntry[] = [
     targetType: "user",
     timestamp: "2026-04-30T11:14:00Z",
     meta: { source: "hubspot", company: "Beste Broodjes" },
+    entrepreneurId: "u_sanne",
   },
   {
     id: "al2",
     actorId: "u_joanne",
     action: "user.assigned_to_cohort",
-    target: "Sanne Mulder → Jouw Programma 7",
+    target: "Sanne Mulder → Jouw Programma voorjaar 2026",
     targetType: "cohort",
     timestamp: "2026-04-30T11:18:00Z",
+    entrepreneurId: "u_sanne",
   },
   {
     id: "al3",
@@ -509,6 +511,7 @@ export const auditLog: AuditEntry[] = [
     target: "Sanne Mulder ← Hans de Waard",
     targetType: "permission",
     timestamp: "2026-04-30T11:19:00Z",
+    entrepreneurId: "u_sanne",
   },
   {
     id: "al4",
@@ -518,20 +521,22 @@ export const auditLog: AuditEntry[] = [
     targetType: "file",
     timestamp: "2026-04-26T20:14:00Z",
     meta: { size: 89120 },
+    entrepreneurId: "u_marleen",
   },
   {
     id: "al5",
     actorId: "u_hans",
     action: "feedback.posted",
-    target: "Marleen — SWOT-analyse",
+    target: "Marleen, SWOT-analyse",
     targetType: "workfolder",
     timestamp: "2026-04-29T14:12:00Z",
+    entrepreneurId: "u_marleen",
   },
   {
     id: "al6",
     actorId: "u_pascal",
     action: "library.published",
-    target: "Pitch Architectuur — 90 seconden",
+    target: "Pitch Architectuur, 90 seconden",
     targetType: "library",
     timestamp: "2026-04-22T08:00:00Z",
   },
@@ -539,7 +544,7 @@ export const auditLog: AuditEntry[] = [
     id: "al7",
     actorId: "u_joanne",
     action: "retention.scheduled",
-    target: "Jouw Programma 5 (14 ondernemers)",
+    target: "Jouw Programma najaar 2025 (14 ondernemers)",
     targetType: "permission",
     timestamp: "2026-05-07T08:00:00Z",
     meta: { daysUntilArchive: 14 },
@@ -552,7 +557,187 @@ export const auditLog: AuditEntry[] = [
     targetType: "cohort",
     timestamp: "2026-05-05T08:00:00Z",
   },
+  // Activity van Marleen (Hans)
+  {
+    id: "al10",
+    actorId: "u_marleen",
+    action: "file.uploaded",
+    target: "Moodboard merkidentiteit.png",
+    targetType: "file",
+    timestamp: "2026-05-02T09:30:00Z",
+    meta: { folder: "Week 3, Merk" },
+    entrepreneurId: "u_marleen",
+  },
+  {
+    id: "al11",
+    actorId: "u_marleen",
+    action: "chat.posted",
+    target: "Bericht in #algemeen",
+    targetType: "chat",
+    timestamp: "2026-05-04T07:42:00Z",
+    entrepreneurId: "u_marleen",
+  },
+  // Activity van Bram (Hans)
+  {
+    id: "al12",
+    actorId: "u_bram",
+    action: "file.uploaded",
+    target: "Doelgroep-interviews-synthese.pdf",
+    targetType: "file",
+    timestamp: "2026-05-06T22:08:00Z",
+    meta: { size: 312405 },
+    entrepreneurId: "u_bram",
+  },
+  {
+    id: "al13",
+    actorId: "u_bram",
+    action: "assignment.submitted",
+    target: "Doelgroep-interviews (n=5)",
+    targetType: "assignment",
+    timestamp: "2026-05-06T22:12:00Z",
+    entrepreneurId: "u_bram",
+  },
+  {
+    id: "al14",
+    actorId: "u_bram",
+    action: "ai.queried",
+    target: "Vraag aan bibliotheek over pitch-structuur",
+    targetType: "library",
+    timestamp: "2026-05-05T18:15:00Z",
+    entrepreneurId: "u_bram",
+  },
+  // Activity van Chantal (Hans)
+  {
+    id: "al15",
+    actorId: "u_chantal",
+    action: "file.uploaded",
+    target: "SWOT-analyse-v2.docx",
+    targetType: "file",
+    timestamp: "2026-05-03T19:45:00Z",
+    meta: { size: 78900 },
+    entrepreneurId: "u_chantal",
+  },
+  {
+    id: "al16",
+    actorId: "u_chantal",
+    action: "chat.posted",
+    target: "Bericht in #horeca-club",
+    targetType: "chat",
+    timestamp: "2026-04-26T09:14:00Z",
+    entrepreneurId: "u_chantal",
+  },
+  // Activity van Omar (Hans, inactief)
+  {
+    id: "al17",
+    actorId: "u_omar",
+    action: "file.uploaded",
+    target: "Intake-document.pdf",
+    targetType: "file",
+    timestamp: "2026-04-29T14:30:00Z",
+    entrepreneurId: "u_omar",
+  },
+  // Activity van Sanne (Hans)
+  {
+    id: "al18",
+    actorId: "u_sanne",
+    action: "chat.posted",
+    target: "Bericht in #algemeen",
+    targetType: "chat",
+    timestamp: "2026-04-22T14:34:00Z",
+    entrepreneurId: "u_sanne",
+  },
+  {
+    id: "al19",
+    actorId: "u_sanne",
+    action: "file.uploaded",
+    target: "Concurrentie-matrix.xlsx",
+    targetType: "file",
+    timestamp: "2026-05-01T11:20:00Z",
+    entrepreneurId: "u_sanne",
+  },
+  // Activity van Jeroen (Nicola)
+  {
+    id: "al20",
+    actorId: "u_jeroen",
+    action: "file.uploaded",
+    target: "SWOT-analyse-v2.docx",
+    targetType: "file",
+    timestamp: "2026-04-27T16:18:00Z",
+    entrepreneurId: "u_jeroen",
+  },
+  {
+    id: "al21",
+    actorId: "u_jeroen",
+    action: "ai.queried",
+    target: "Vraag aan bibliotheek over hardware-pricing",
+    targetType: "library",
+    timestamp: "2026-05-04T20:30:00Z",
+    entrepreneurId: "u_jeroen",
+  },
+  // Activity van Aisha (Nicola)
+  {
+    id: "al22",
+    actorId: "u_aisha",
+    action: "file.uploaded",
+    target: "Concept-collectie SS26.png",
+    targetType: "file",
+    timestamp: "2026-05-07T16:45:00Z",
+    meta: { size: 1245000 },
+    entrepreneurId: "u_aisha",
+  },
+  {
+    id: "al23",
+    actorId: "u_aisha",
+    action: "assignment.submitted",
+    target: "Doelgroep-interviews (n=5)",
+    targetType: "assignment",
+    timestamp: "2026-05-07T17:02:00Z",
+    entrepreneurId: "u_aisha",
+  },
+  // Activity van Isabel (Nicola)
+  {
+    id: "al24",
+    actorId: "u_isabel",
+    action: "ai.queried",
+    target: "Vraag aan bibliotheek over JTBD-interviews",
+    targetType: "library",
+    timestamp: "2026-05-04T11:48:00Z",
+    entrepreneurId: "u_isabel",
+  },
+  {
+    id: "al25",
+    actorId: "u_isabel",
+    action: "file.uploaded",
+    target: "JTBD-interviews-50.xlsx",
+    targetType: "file",
+    timestamp: "2026-05-04T22:11:00Z",
+    entrepreneurId: "u_isabel",
+  },
+  // Activity van Finn (Nicola)
+  {
+    id: "al26",
+    actorId: "u_finn",
+    action: "file.uploaded",
+    target: "Eerste pitch-90sec.mp4",
+    targetType: "file",
+    timestamp: "2026-05-05T22:48:00Z",
+    meta: { size: 4500000 },
+    entrepreneurId: "u_finn",
+  },
 ];
+
+// Coach kan alleen events zien van ondernemers die onder hem vallen.
+// Filtert op entrepreneurId via de werkmap-coachId koppeling.
+export function auditForCoach(coachId: string, entrepreneurIds: string[], filterEntrepreneurId?: string): AuditEntry[] {
+  return auditLog
+    .filter((e) => {
+      if (!e.entrepreneurId) return false;
+      if (!entrepreneurIds.includes(e.entrepreneurId)) return false;
+      if (filterEntrepreneurId && e.entrepreneurId !== filterEntrepreneurId) return false;
+      return true;
+    })
+    .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+}
 
 export const events: CalendarEvent[] = [
   {

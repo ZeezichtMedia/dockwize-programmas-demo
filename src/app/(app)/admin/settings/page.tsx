@@ -29,7 +29,7 @@ const integrations: Integration[] = [
     name: "Bisner Community",
     description: "Open de Dockwize Community-omgeving (chat, members, events) in een nieuw tabblad zonder dubbel inloggen.",
     state: "connected",
-    note: "SSO-koppeling actief · 'Open in Bisner'-knop in cohort-pagina",
+    note: "SSO-koppeling actief · 'Open in Bisner'-knop in groep-pagina",
     icon: <BisnerIcon />,
   },
   {

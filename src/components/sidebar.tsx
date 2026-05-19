@@ -39,7 +39,7 @@ const navByRole: Record<Role, NavGroup[]> = {
     {
       items: [
         { label: "Mijn werkmap", href: "/werkmap", icon: Folder },
-        { label: "Mijn cohort", href: "/cohort", icon: Users },
+        { label: "Mijn groep", href: "/cohort", icon: Users },
         { label: "Bibliotheek", href: "/bibliotheek", icon: Library },
         { label: "Vraag de bibliotheek", href: "/ai", icon: Sparkles, badge: "AI" },
       ],
@@ -55,6 +55,7 @@ const navByRole: Record<Role, NavGroup[]> = {
     {
       items: [
         { label: "Mijn ondernemers", href: "/coach", icon: Users },
+        { label: "Activiteit", href: "/coach/activiteit", icon: ClipboardList },
         { label: "Inbox", href: "/inbox", icon: Inbox, badge: 2 },
         { label: "Bibliotheek", href: "/bibliotheek", icon: Library },
       ],
@@ -65,7 +66,7 @@ const navByRole: Record<Role, NavGroup[]> = {
       items: [
         { label: "Mijn programma's", href: "/programma-manager", icon: GraduationCap },
         { label: "Content publiceren", href: "/admin/content", icon: Library },
-        { label: "Cohorts", href: "/admin/cohorts", icon: Users },
+        { label: "Groepen", href: "/admin/cohorts", icon: Users },
         { label: "Inbox", href: "/inbox", icon: Inbox },
       ],
     },
@@ -75,7 +76,7 @@ const navByRole: Record<Role, NavGroup[]> = {
       items: [
         { label: "Overzicht", href: "/admin", icon: LayoutDashboard },
         { label: "Ondernemers", href: "/admin/users", icon: Building2 },
-        { label: "Cohorts", href: "/admin/cohorts", icon: Users },
+        { label: "Groepen", href: "/admin/cohorts", icon: Users },
         { label: "Coaches", href: "/admin/coaches", icon: GraduationCap },
         { label: "Content", href: "/admin/content", icon: Library },
       ],
@@ -95,7 +96,7 @@ const navByRole: Record<Role, NavGroup[]> = {
       items: [
         { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         { label: "Programma's", href: "/admin/programmas", icon: GraduationCap },
-        { label: "Cohorts", href: "/admin/cohorts", icon: Users },
+        { label: "Groepen", href: "/admin/cohorts", icon: Users },
         { label: "Ondernemers", href: "/admin/users", icon: Building2 },
         { label: "Bibliotheek", href: "/bibliotheek", icon: Library },
       ],

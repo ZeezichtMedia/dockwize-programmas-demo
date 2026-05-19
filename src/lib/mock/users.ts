@@ -70,6 +70,15 @@ export const users: User[] = [
     avatar: "/team/nicola.jpg",
     jobTitle: "Groeicoach",
     bio: "Marketing-strateeg en merkbouwer. Werkte voor o.a. PostNL en Albert Heijn.",
+    availability: {
+      status: "away",
+      awayFrom: "2026-05-07",
+      awayUntil: "2026-05-13",
+      reason: "ziek",
+      coverageBy: "u_hans",
+      coverageMessage:
+        "Voor dringende vragen: app Hans even. Plannen we deze week 1-op-1's met Hans als vervanger, of schuiven we naar volgende week.",
+    },
   },
   // Ondernemers — fictief, gradient avatars
   {

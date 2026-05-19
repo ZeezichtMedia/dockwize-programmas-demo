@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, AlertCircle, CheckCircle2, Clock, MessageSquareReply, Search } from "lucide-react";
+import { ArrowRight, AlertCircle, CheckCircle2, Clock, MessageSquareReply, Search, UserCheck } from "lucide-react";
 import { Topbar } from "@/components/topbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,32 +10,45 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useUser } from "@/lib/auth-context";
-import { getFoldersForCoach } from "@/lib/mock/workfolders";
-import { getUser, coaches } from "@/lib/mock/users";
+import { getFoldersForCoach, workfolders } from "@/lib/mock/workfolders";
+import { getUser, coaches, users } from "@/lib/mock/users";
 import { GradientAvatar } from "@/components/user-pill";
-import { relativeTime } from "@/lib/utils";
+import { CoachCoveringBanner, CoachSelfAwayBanner } from "@/components/coach-away-banner";
+import { relativeTime, cn } from "@/lib/utils";
 
 export default function CoachPage() {
   const user = useUser();
   // If not coach, fallback to Hans
   const coachId = user.role === "coach" ? user.id : "u_hans";
   const coach = getUser(coachId)!;
-  const folders = getFoldersForCoach(coachId);
+  const ownFolders = getFoldersForCoach(coachId);
+
+  // Coaches that this coach is covering for (e.g. Nicola is sick, Hans covers)
+  const coveredCoaches = users.filter(
+    (u) => u.role === "coach" && u.availability?.status === "away" && u.availability.coverageBy === coachId
+  );
+  const coveredFolders = coveredCoaches.flatMap((c) => getFoldersForCoach(c.id));
+
+  // Combined list with flag whether each folder is own or coverage
+  const folders = [
+    ...ownFolders.map((f) => ({ folder: f, isCoverage: false, originalCoachId: coachId })),
+    ...coveredFolders.map((f) => ({ folder: f, isCoverage: true, originalCoachId: f.coachId })),
+  ];
 
   const [search, setSearch] = React.useState("");
 
   const stats = {
     total: folders.length,
-    needsFeedback: folders.filter((f) =>
+    needsFeedback: folders.filter(({ folder: f }) =>
       f.assignments.some((a) => a.status === "submitted")
     ).length,
-    inactive: folders.filter((f) => {
+    inactive: folders.filter(({ folder: f }) => {
       const lastFile = f.files.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt))[0];
       if (!lastFile) return true;
       return Date.now() - new Date(lastFile.uploadedAt).getTime() > 7 * 24 * 60 * 60 * 1000;
     }).length,
     avgProgress: Math.round(
-      folders.reduce((sum, f) => {
+      folders.reduce((sum, { folder: f }) => {
         const done = f.assignments.filter((a) => a.status === "done").length;
         return sum + (done / f.assignments.length) * 100;
       }, 0) / Math.max(folders.length, 1)
@@ -43,14 +56,23 @@ export default function CoachPage() {
   };
 
   const list = folders
-    .map((f) => {
+    .map(({ folder: f, isCoverage, originalCoachId }) => {
       const ent = getUser(f.entrepreneurId)!;
       const done = f.assignments.filter((a) => a.status === "done").length;
       const progress = Math.round((done / f.assignments.length) * 100);
       const open = f.assignments.find((a) => a.status === "submitted" || a.status === "in_progress");
       const lastFile = f.files.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt))[0];
       const lastActivity = lastFile?.uploadedAt ?? f.assignments[0]?.createdAt;
-      return { folder: f, ent, progress, open, lastActivity, needsFeedback: f.assignments.some((a) => a.status === "submitted") };
+      return {
+        folder: f,
+        ent,
+        progress,
+        open,
+        lastActivity,
+        needsFeedback: f.assignments.some((a) => a.status === "submitted"),
+        isCoverage,
+        originalCoachId,
+      };
     })
     .filter((row) => {
       if (!search) return true;
@@ -66,9 +88,18 @@ export default function CoachPage() {
     <>
       <Topbar
         title="Mijn ondernemers"
-        subtitle={`${coach.name} · ${folders.length} actieve werkmappen`}
+        subtitle={`${coach.name} · ${ownFolders.length} eigen ondernemers${coveredFolders.length > 0 ? ` + ${coveredFolders.length} waarneming` : ""}`}
       />
       <div className="space-y-6 p-6">
+        {/* Self away banner (Nicola) */}
+        {coach.availability?.status === "away" && (
+          <CoachSelfAwayBanner user={coach} />
+        )}
+        {/* Coverage banner (Hans, who covers for Nicola) */}
+        {coveredCoaches.length > 0 && (
+          <CoachCoveringBanner coveredUsers={coveredCoaches} />
+        )}
+
         {/* Stats */}
         <div data-tour="coach-stats" className="grid gap-3 md:grid-cols-4">
           <StatCard label="Actieve ondernemers" value={stats.total} icon="•" tone="default" />
@@ -117,17 +148,27 @@ export default function CoachPage() {
             </div>
           </div>
           <div>
-            {list.map(({ folder, ent, progress, open, lastActivity, needsFeedback }) => (
+            {list.map(({ folder, ent, progress, open, lastActivity, needsFeedback, isCoverage, originalCoachId }) => {
+              const originalCoach = isCoverage ? getUser(originalCoachId) : null;
+              return (
               <Link
                 key={folder.id}
                 href={`/coach/${ent.id}`}
-                className="grid grid-cols-[1fr_140px_180px_140px_60px] items-center gap-4 border-b border-[var(--color-border)] px-5 py-3.5 last:border-0 transition-colors hover:bg-[var(--color-surface-2)]/60"
+                className={cn(
+                  "grid grid-cols-[1fr_140px_180px_140px_60px] items-center gap-4 border-b border-[var(--color-border)] px-5 py-3.5 last:border-0 transition-colors hover:bg-[var(--color-surface-2)]/60",
+                  isCoverage && "bg-blue-50/30"
+                )}
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <GradientAvatar initials={ent.initials ?? ent.name[0]} gradient={ent.gradient ?? "from-zinc-400 to-zinc-600"} size="md" />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="truncate text-[13.5px] font-semibold text-[var(--color-ink)]">{ent.name}</p>
+                      {isCoverage && originalCoach && (
+                        <Badge variant="info" className="gap-1 text-[9.5px]">
+                          <UserCheck className="size-2.5" /> Waarneming voor {originalCoach.name.split(" ")[0]}
+                        </Badge>
+                      )}
                       {needsFeedback && (
                         <Badge variant="soft" className="gap-1 text-[9.5px]">
                           <MessageSquareReply className="size-2.5" /> Feedback nodig
@@ -153,7 +194,8 @@ export default function CoachPage() {
                   <ArrowRight className="size-4 text-[var(--color-muted)]" />
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </Card>
       </div>

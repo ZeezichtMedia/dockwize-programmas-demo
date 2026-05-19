@@ -62,7 +62,7 @@ export default function AdminPage() {
             changeTone="positive"
           />
           <KPICard
-            label="Actieve cohorts"
+            label="Actieve groepen"
             value={activeCohorts}
             icon={Users}
             change="3 lopend, 1 starts in juni"

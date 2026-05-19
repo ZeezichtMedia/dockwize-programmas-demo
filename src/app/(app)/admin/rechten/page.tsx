@@ -21,20 +21,20 @@ export default function RechtenPage() {
           <CardContent className="space-y-2">
             <RoleRow
               role="Ondernemer"
-              description="Heeft alleen toegang tot eigen werkmap, eigen cohort-chat en bibliotheek van het programma."
-              canSee={["Eigen bestanden", "Eigen opdrachten", "Cohort-deelnemers", "Bibliotheek programma", "Subgroepen waar ik in zit"]}
+              description="Heeft alleen toegang tot eigen werkmap, eigen groep-chat en bibliotheek van het programma."
+              canSee={["Eigen bestanden", "Eigen opdrachten", "Andere deelnemers in eigen groep", "Bibliotheek programma", "Subgroepen waar ik in zit"]}
               cantSee={["Werkmappen van andere ondernemers", "Andere coaches' notities"]}
             />
             <RoleRow
               role="Coach"
               description="Toegang tot werkmappen van toegewezen ondernemers. Niet die van andere coaches."
-              canSee={["Eigen ondernemers", "Hun bestanden + opdrachten", "Cohort-chat", "Bibliotheek"]}
+              canSee={["Eigen ondernemers", "Hun bestanden + opdrachten", "Groep-chat", "Bibliotheek"]}
               cantSee={["Ondernemers van andere coaches", "Audit log", "Beheer"]}
             />
             <RoleRow
               role="Coördinator"
               description="Beheert ondernemers, programma's en content. Geen toegang tot werkmap-inhoud zonder reden."
-              canSee={["Alle ondernemers (lijst)", "Cohort-beheer", "Content publicatie", "Audit log", "Retentie"]}
+              canSee={["Alle ondernemers (lijst)", "Groep-beheer", "Content publicatie", "Audit log", "Retentie"]}
               cantSee={["Werkmap-bestanden zonder geldige reden, en elke inzage wordt gelogd"]}
             />
             <RoleRow

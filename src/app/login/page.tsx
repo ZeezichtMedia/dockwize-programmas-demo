@@ -18,7 +18,7 @@ const heroQuotes = [
     quote:
       "Geen Microsoft-account nodig. Ik klik op de mail en zit meteen in mijn werkmap.",
     name: "Marleen de Visser",
-    company: "De Werkbrand · Jouw Programma 7",
+    company: "De Werkbrand · Jouw Programma voorjaar 2026",
   },
   {
     quote:

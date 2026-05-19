@@ -13,6 +13,15 @@ export interface User {
   coachId?: string;
   initials?: string;
   gradient?: string;
+  // Coach-specific: optionele afwezigheid + waarneming
+  availability?: {
+    status: "available" | "away";
+    awayUntil?: string; // ISO datum tot wanneer
+    awayFrom?: string;
+    reason?: string; // ziek, vakantie, opleiding
+    coverageBy?: string; // userId van waarnemer
+    coverageMessage?: string;
+  };
 }
 
 export interface Program {
@@ -73,6 +82,20 @@ export interface Assignment {
   createdAt: string;
 }
 
+export type GuestRole = "viewer" | "commenter";
+export type GuestStatus = "invited" | "active";
+
+export interface GuestMember {
+  id: string;
+  email: string;
+  name?: string; // ingevuld zodra gast magic-link heeft geactiveerd
+  role: GuestRole;
+  status: GuestStatus;
+  invitedAt: string;
+  invitedBy: string; // userId van de ondernemer die uitnodigt
+  relationship?: string; // bv. "partner", "mede-oprichter", "boekhouder"
+}
+
 export interface WorkFolder {
   id: string;
   entrepreneurId: string;
@@ -84,6 +107,7 @@ export interface WorkFolder {
   notes?: string;
   retentionDays: number;
   archivedAt?: string;
+  guests?: GuestMember[];
 }
 
 export interface LibraryItem {
@@ -142,9 +166,11 @@ export interface AuditEntry {
   actorId: string;
   action: string;
   target: string;
-  targetType: "user" | "workfolder" | "file" | "permission" | "cohort" | "library";
+  targetType: "user" | "workfolder" | "file" | "permission" | "cohort" | "library" | "assignment" | "chat" | "session";
   timestamp: string;
   meta?: Record<string, string | number | boolean>;
+  // For coach-scoped filtering: which entrepreneur's activity does this relate to
+  entrepreneurId?: string;
 }
 
 export interface CalendarEvent {
@@ -158,6 +184,22 @@ export interface CalendarEvent {
   location?: string;
   description?: string;
   prepLibraryItemIds?: string[];
+}
+
+export type ProposalStatus = "proposed" | "accepted" | "alternatives_requested" | "rescheduled" | "declined";
+
+export interface SessionProposal {
+  id: string;
+  coachId: string;
+  entrepreneurId: string;
+  primarySlot: string; // ISO datetime, eerste voorstel
+  alternativeSlots: string[]; // 3 voorgestelde alternatieven als ondernemer niet kan
+  durationMin: number; // 30, 45, 60
+  location: string; // "Online (Teams)" of "Brasserie PZEM 41" etc.
+  reason: string; // waarover gaat het gesprek
+  status: ProposalStatus;
+  proposedAt: string;
+  acceptedSlot?: string;
 }
 
 export interface AIThread {

@@ -163,7 +163,56 @@ const buildFolder = (entrepreneurId: string, coachId: string, cohortId: string, 
   assignments: baseAssignments(entrepreneurId, coachId),
   notes: "",
   retentionDays: 90,
+  guests: [],
 });
+
+const guestSeeds: Record<string, WorkFolder["guests"]> = {
+  u_marleen: [
+    {
+      id: "g_marleen_1",
+      email: "tijs@werkbrand.nl",
+      name: "Tijs van Aalst",
+      role: "commenter",
+      status: "active",
+      invitedAt: "2026-04-12T15:30:00Z",
+      invitedBy: "u_marleen",
+      relationship: "Mede-oprichter",
+    },
+    {
+      id: "g_marleen_2",
+      email: "marja.devisser@hotmail.com",
+      role: "viewer",
+      status: "invited",
+      invitedAt: "2026-05-05T20:14:00Z",
+      invitedBy: "u_marleen",
+      relationship: "Boekhouder",
+    },
+  ],
+  u_chantal: [
+    {
+      id: "g_chantal_1",
+      email: "willem@haventerras.nl",
+      name: "Willem Verschuure",
+      role: "commenter",
+      status: "active",
+      invitedAt: "2026-04-10T09:00:00Z",
+      invitedBy: "u_chantal",
+      relationship: "Vader, mede-eigenaar",
+    },
+  ],
+  u_aisha: [
+    {
+      id: "g_aisha_1",
+      email: "lex@studiokind.com",
+      name: "Lex Boutkabout",
+      role: "commenter",
+      status: "active",
+      invitedAt: "2026-04-15T11:20:00Z",
+      invitedBy: "u_aisha",
+      relationship: "Co-founder",
+    },
+  ],
+};
 
 export const workfolders: WorkFolder[] = [
   buildFolder("u_marleen", "u_hans", "c_jp7", "p_jouw"),
@@ -185,6 +234,12 @@ workfolders.forEach((wf) => {
     const a = wf.assignments.find((x) => x.id === override.id);
     if (a && override.status) a.status = override.status;
   });
+});
+
+// Seed guests
+workfolders.forEach((wf) => {
+  const seed = guestSeeds[wf.entrepreneurId];
+  if (seed) wf.guests = seed;
 });
 
 export const getFolderForEntrepreneur = (entrepreneurId: string) =>
