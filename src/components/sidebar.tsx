@@ -161,14 +161,12 @@ export function Sidebar({ role }: SidebarProps) {
       data-pinned={pinned ? "true" : "false"}
       className="dw-sidebar hidden h-full shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] md:flex"
     >
-      <div className="relative flex h-14 items-center border-b border-[var(--color-border)] px-3">
-        <Link href="/" className="relative block w-full">
-          {/* Mark, altijd zichtbaar in rail */}
-          <div className="flex h-9 w-9 items-center justify-center rounded-[8px] bg-[var(--color-ink)]">
-            <DockwizeMark size={18} />
+      <div className="flex h-14 items-center border-b border-[var(--color-border)] px-3">
+        <Link href="/" className="block" aria-label="Dockwize Werkmap">
+          <div className="dw-sidebar-mark-only h-9 w-9 items-center justify-center">
+            <DockwizeMark size={32} />
           </div>
-          {/* Volledig logo, fade-in in open-state */}
-          <div className="dw-sidebar-logo-full absolute left-0 top-0 flex h-9 items-center">
+          <div className="dw-sidebar-full-only h-9 items-center">
             <DockwizeLogo size="md" />
           </div>
         </Link>

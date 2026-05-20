@@ -168,16 +168,20 @@
   max-height: 600px;
 }
 
-/* Logo-swap: alleen icoon in rail, full logo in open-state */
-.dw-sidebar-logo-full {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s var(--sidebar-ease);
+/* Logo-swap: alleen mark in rail, full wordmark in open-state */
+.dw-sidebar-mark-only {
+  display: flex;
 }
-.dw-sidebar:hover .dw-sidebar-logo-full,
-.dw-sidebar:focus-within .dw-sidebar-logo-full,
-.dw-sidebar[data-pinned="true"] .dw-sidebar-logo-full {
-  opacity: 1;
-  pointer-events: auto;
-  transition-delay: 80ms;
+.dw-sidebar-full-only {
+  display: none;
+}
+.dw-sidebar:hover .dw-sidebar-mark-only,
+.dw-sidebar:focus-within .dw-sidebar-mark-only,
+.dw-sidebar[data-pinned="true"] .dw-sidebar-mark-only {
+  display: none;
+}
+.dw-sidebar:hover .dw-sidebar-full-only,
+.dw-sidebar:focus-within .dw-sidebar-full-only,
+.dw-sidebar[data-pinned="true"] .dw-sidebar-full-only {
+  display: flex;
 }
