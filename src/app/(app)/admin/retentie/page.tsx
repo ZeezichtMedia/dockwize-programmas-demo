@@ -30,7 +30,7 @@ const retentionPolicies = [
 
 export default function AdminRetentiePage() {
   const jp5 = {
-    name: "Jouw Programma · najaar 2025",
+    name: "Jouw Programma · Q4 2025",
     members: 14,
     archiveDate: "2026-05-22",
     daysUntil: 14,

@@ -64,7 +64,7 @@ const stepsByRole: Record<Role, TourStep[]> = {
       title: "Hoi, ik loop even mee.",
       body: (
         <>
-          Je kijkt nu mee als <strong>Marleen</strong>, een verzonnen ondernemer in Jouw Programma voorjaar 2026. In een minuutje laat ik zien wat de plekken doen. Loopt iets niet lekker? App Jorian even.
+          Je kijkt nu mee als <strong>Marleen</strong>, een verzonnen ondernemer in Jouw Programma Q2 2026. In een minuutje laat ik zien wat de plekken doen. Loopt iets niet lekker? App Jorian even.
         </>
       ),
       primaryActionLabel: "Loop maar mee",
