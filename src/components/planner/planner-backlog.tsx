@@ -169,6 +169,7 @@ export function PlannerBacklog({
           <MultiFilter
             label="Status"
             compact
+            align="left"
             options={ALL_PLANNER_STATUSES.map((s) => ({
               id: s,
               label: plannerStatusLabel[s],
@@ -181,6 +182,7 @@ export function PlannerBacklog({
           <MultiFilter
             label="Coach"
             compact
+            align="left"
             options={coaches.map((c) => ({
               id: c.id,
               label: c.name,
@@ -192,6 +194,7 @@ export function PlannerBacklog({
           <MultiFilter
             label="Programma"
             compact
+            align="left"
             options={programs
               .filter((p) => (programCounts.get(p.id) ?? 0) > 0)
               .map((p) => ({

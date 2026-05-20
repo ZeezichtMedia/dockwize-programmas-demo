@@ -21,6 +21,9 @@ interface MultiFilterProps {
   emptyLabel?: string;
   className?: string;
   compact?: boolean;
+  /** "right" = dropdown lijnt uit op rechter-rand van trigger (opent naar links).
+   *  "left" = lijnt uit op linker-rand (opent naar rechts). Default: right. */
+  align?: "left" | "right";
 }
 
 export function MultiFilter({
@@ -31,6 +34,7 @@ export function MultiFilter({
   emptyLabel = "Geen",
   className,
   compact,
+  align = "right",
 }: MultiFilterProps) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
@@ -106,7 +110,10 @@ export function MultiFilter({
         <div
           role="listbox"
           aria-label={`${label} filteren`}
-          className="absolute right-0 z-30 mt-1.5 w-64 overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-xl)]"
+          className={cn(
+            "absolute z-50 mt-1.5 w-64 overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-xl)]",
+            align === "left" ? "left-0" : "right-0"
+          )}
         >
           <div className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-2">
             <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-muted)]">
