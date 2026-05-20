@@ -11,6 +11,8 @@ export interface User {
   jobTitle?: string;
   cohortId?: string;
   coachId?: string;
+  /** Optionele secundaire coaches. Hans = regie, Arne = prototype-sessies, etc. */
+  secondaryCoachIds?: string[];
   initials?: string;
   gradient?: string;
   // Coach-specific: optionele afwezigheid + waarneming

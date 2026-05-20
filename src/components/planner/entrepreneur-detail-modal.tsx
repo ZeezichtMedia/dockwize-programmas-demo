@@ -34,6 +34,8 @@ import { getCohort, getProgram } from "@/lib/mock/programs";
 import { proposalsForEntrepreneur } from "@/lib/mock/sessions";
 import { auditLog } from "@/lib/mock/notifications";
 import { plannerStatusTone } from "@/lib/mock/planner";
+import { getEntrepreneurLifePhase } from "@/lib/mock/lifephases";
+import { LifePhaseTrack } from "@/components/life-phase-track";
 import { cn, relativeTime } from "@/lib/utils";
 import type { PlannerEntrepreneur } from "@/lib/mock/planner";
 
@@ -58,6 +60,7 @@ export function EntrepreneurDetailModal({
   const cohort = user.cohortId ? getCohort(user.cohortId) : null;
   const program = cohort ? getProgram(cohort.programId) : null;
   const proposals = proposalsForEntrepreneur(user.id);
+  const lifePhase = getEntrepreneurLifePhase(user.id);
   const recentActivity = auditLog
     .filter((e) => e.entrepreneurId === user.id)
     .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
@@ -124,6 +127,21 @@ export function EntrepreneurDetailModal({
 
         {/* Body */}
         <div className="space-y-4 px-6 pb-6">
+          {/* Levensfase strip */}
+          {lifePhase && (
+            <div className="rounded-[10px] border border-[var(--color-border)] p-3">
+              <p className="mb-2 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-[var(--color-muted)]">
+                Levensfase: {lifePhase.phase.label}
+              </p>
+              <LifePhaseTrack current={lifePhase.phase.id} compact />
+              {lifePhase.nextStep && (
+                <p className="mt-2 text-[11.5px] text-[var(--color-ink-2)]">
+                  <span className="font-medium text-[var(--color-ink)]">Volgende:</span> {lifePhase.nextStep}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Programma + Coach */}
           <div className="grid gap-2 sm:grid-cols-2">
             <InfoBlock icon={Folder} label="Programma">

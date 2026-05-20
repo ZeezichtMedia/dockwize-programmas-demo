@@ -37,6 +37,8 @@ import { openProposalForEntrepreneur } from "@/lib/mock/sessions";
 import { TeamMembersCard } from "@/components/team-members-card";
 import { RequestOneOnOneDialog } from "@/components/quick-plan-dialog";
 import { DownloadWorkfolderDialog } from "@/components/download-workfolder-dialog";
+import { LifePhaseTrack } from "@/components/life-phase-track";
+import { getEntrepreneurLifePhase } from "@/lib/mock/lifephases";
 import { useUser } from "@/lib/auth-context";
 import { getFolderForEntrepreneur } from "@/lib/mock/workfolders";
 import { getUser } from "@/lib/mock/users";
@@ -77,8 +79,20 @@ export default function WerkmapPage() {
   const doneCount = folder.assignments.filter((a) => a.status === "done").length;
   const progress = Math.round((doneCount / folder.assignments.length) * 100);
 
+  // Slim advies: vind items uit de module van de eerstvolgende open opdracht
+  const currentAssignment = folder.assignments.find((a) => a.status === "in_progress")
+    ?? folder.assignments.find((a) => a.status === "todo");
+  const currentModule = currentAssignment?.module;
+  const moduleRecommendations = currentModule
+    ? lib.filter((item) => item.module === currentModule).slice(0, 3)
+    : lib.slice(0, 3);
+  const recommendationTitle = currentModule
+    ? `Bij jouw huidige module: ${currentModule}`
+    : "Aanbevolen voor jou";
+
   const folders = Array.from(new Set(folder.files.map((f) => f.folder).filter(Boolean))) as string[];
   const openProposal = openProposalForEntrepreneur(user.id);
+  const lifePhase = getEntrepreneurLifePhase(user.id);
   const [requestOpen, setRequestOpen] = React.useState(false);
   const [downloadOpen, setDownloadOpen] = React.useState(false);
 
@@ -148,18 +162,43 @@ export default function WerkmapPage() {
             className="rounded-[14px] border border-[var(--color-border)] bg-gradient-to-br from-[var(--color-surface-2)] to-white p-4"
           >
             <p className="text-[10.5px] font-medium uppercase tracking-wider text-[var(--color-muted)]">
-              Jouw coach
+              {user.secondaryCoachIds && user.secondaryCoachIds.length > 0 ? "Jouw coaches" : "Jouw coach"}
             </p>
             <div className="mt-2 flex items-start gap-3">
               <UserAvatar src={coach.avatar} name={coach.name} size="lg" />
               <div className="min-w-0 flex-1">
-                <p className="text-[14px] font-semibold text-[var(--color-ink)]">{coach.name}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-[14px] font-semibold text-[var(--color-ink)]">{coach.name}</p>
+                  <Badge variant="dark" className="text-[9px]">Regie</Badge>
+                </div>
                 <p className="text-[12px] text-[var(--color-ink-3)]">{coach.jobTitle}</p>
                 <p className="mt-1.5 line-clamp-2 text-[12px] text-[var(--color-ink-2)]">
                   {coach.bio}
                 </p>
               </div>
             </div>
+            {user.secondaryCoachIds && user.secondaryCoachIds.length > 0 && (
+              <div className="mt-3 border-t border-[var(--color-border)] pt-2.5">
+                <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-[var(--color-muted)]">
+                  Ook beschikbaar
+                </p>
+                <div className="space-y-1.5">
+                  {user.secondaryCoachIds.map((id) => {
+                    const c = getUser(id);
+                    if (!c) return null;
+                    return (
+                      <div key={id} className="flex items-center gap-2">
+                        <UserAvatar src={c.avatar} name={c.name} size="sm" />
+                        <div className="min-w-0">
+                          <p className="truncate text-[12px] font-medium">{c.name}</p>
+                          <p className="truncate text-[10.5px] text-[var(--color-ink-3)]">Voor specifieke sessies</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <div className="mt-3 flex gap-2">
               <Button size="sm" variant="accent" className="flex-1" onClick={() => setRequestOpen(true)}>
                 <CalendarPlus className="size-3.5" /> Vraag 1-op-1 aan
@@ -191,6 +230,14 @@ export default function WerkmapPage() {
           {/* Overzicht */}
           <TabsContent value="overzicht" className="space-y-6">
             {openProposal && <SessionProposalCard proposal={openProposal} />}
+            {lifePhase && (
+              <LifePhaseTrack
+                current={lifePhase.phase.id}
+                signals={lifePhase.signals}
+                nextStep={lifePhase.nextStep}
+                entrepreneurName={user.name.split(" ")[0]}
+              />
+            )}
             <div className="grid gap-5 lg:grid-cols-3">
               <Card className="lg:col-span-2">
                 <CardHeader className="flex-row items-center justify-between gap-2">
@@ -248,14 +295,20 @@ export default function WerkmapPage() {
             <Card>
               <CardHeader className="flex-row items-center justify-between gap-2">
                 <div>
-                  <CardTitle>Aanbevolen voor jou</CardTitle>
-                  <p className="text-[12px] text-[var(--color-ink-3)]">Materialen die passen bij waar je nu staat.</p>
+                  <CardTitle className="flex items-center gap-1.5">
+                    <Sparkles className="size-3.5 text-[var(--color-ink-2)]" /> {recommendationTitle}
+                  </CardTitle>
+                  <p className="text-[12px] text-[var(--color-ink-3)]">
+                    {currentModule
+                      ? `Deze materialen sluiten aan op '${currentAssignment?.title ?? ""}'.`
+                      : "Materialen die passen bij waar je nu staat."}
+                  </p>
                 </div>
                 <Button variant="ghost" size="sm">Naar bibliotheek <ChevronRight className="size-4" /></Button>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-3 md:grid-cols-3">
-                  {lib.slice(0, 3).map((item) => (
+                  {moduleRecommendations.map((item) => (
                     <div
                       key={item.id}
                       className="group cursor-pointer overflow-hidden rounded-[12px] border border-[var(--color-border)] transition-all hover:border-[var(--color-ink)] hover:shadow-[var(--shadow-md)]"
