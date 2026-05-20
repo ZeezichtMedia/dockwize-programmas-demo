@@ -273,7 +273,7 @@ export function PlannerBacklog({
       </div>
 
       <div className="border-t border-[var(--color-border)] p-2.5 text-[10px] text-[var(--color-muted)]">
-        Tip: <kbd className="rounded border border-[var(--color-border)] bg-[var(--color-surface-2)] px-1 font-mono">⌘</kbd>-klik voor multi-select · klik op kaart voor details.
+        Tip: sleep om in te plannen · <kbd className="rounded border border-[var(--color-border)] bg-[var(--color-surface-2)] px-1 font-mono">⌘</kbd>-klik om meerdere te selecteren · klik voor details.
       </div>
     </aside>
   );
