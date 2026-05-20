@@ -112,3 +112,72 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
+
+/* ─── Sidebar (rail + hover-expand) ─────────────────────────────────────
+   Patroon overgenomen van ebgw-hub. Standaard smalle rail met icons,
+   bij hover (of focus-within) breidt 'ie uit en faden labels in. Main
+   content schaalt automatisch via flexbox. */
+:root {
+  --sidebar-rail: 64px;
+  --sidebar-open: 260px;
+  --sidebar-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --sidebar-duration: 320ms;
+}
+
+.dw-sidebar {
+  width: var(--sidebar-rail);
+  transition: width var(--sidebar-duration) var(--sidebar-ease);
+}
+.dw-sidebar:hover,
+.dw-sidebar:focus-within,
+.dw-sidebar[data-pinned="true"] {
+  width: var(--sidebar-open);
+}
+
+.dw-sidebar-fade {
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity 0.22s var(--sidebar-ease),
+    transform 0.22s var(--sidebar-ease);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.dw-sidebar:hover .dw-sidebar-fade,
+.dw-sidebar:focus-within .dw-sidebar-fade,
+.dw-sidebar[data-pinned="true"] .dw-sidebar-fade {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  transition-delay: 60ms;
+}
+
+/* Verberg blokken die alleen zin hebben in open-state */
+.dw-sidebar-open-only {
+  opacity: 0;
+  pointer-events: none;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.2s var(--sidebar-ease), max-height 0.25s var(--sidebar-ease);
+}
+.dw-sidebar:hover .dw-sidebar-open-only,
+.dw-sidebar:focus-within .dw-sidebar-open-only,
+.dw-sidebar[data-pinned="true"] .dw-sidebar-open-only {
+  opacity: 1;
+  pointer-events: auto;
+  max-height: 600px;
+}
+
+/* Logo-swap: alleen icoon in rail, full logo in open-state */
+.dw-sidebar-logo-full {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s var(--sidebar-ease);
+}
+.dw-sidebar:hover .dw-sidebar-logo-full,
+.dw-sidebar:focus-within .dw-sidebar-logo-full,
+.dw-sidebar[data-pinned="true"] .dw-sidebar-logo-full {
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: 80ms;
+}
