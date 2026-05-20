@@ -163,8 +163,8 @@ export function Sidebar({ role }: SidebarProps) {
     >
       <div className="flex h-14 items-center border-b border-[var(--color-border)] px-3">
         <Link href="/" className="block" aria-label="Dockwize Werkmap">
-          <div className="dw-sidebar-mark-only h-9 w-9 items-center justify-center">
-            <DockwizeMark size={32} />
+          <div className="dw-sidebar-mark-only h-9 items-center justify-start">
+            <DockwizeMark size={30} />
           </div>
           <div className="dw-sidebar-full-only h-9 items-center">
             <DockwizeLogo size="md" />
