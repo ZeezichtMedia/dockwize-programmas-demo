@@ -136,9 +136,12 @@
 .dw-sidebar-fade {
   opacity: 0;
   transform: translateX(-6px);
+  max-width: 0;
+  overflow: hidden;
   transition:
-    opacity 0.22s var(--sidebar-ease),
-    transform 0.22s var(--sidebar-ease);
+    opacity 0.2s var(--sidebar-ease),
+    transform 0.22s var(--sidebar-ease),
+    max-width 0.3s var(--sidebar-ease);
   pointer-events: none;
   white-space: nowrap;
 }
@@ -146,6 +149,7 @@
 .dw-sidebar[data-pinned="true"] .dw-sidebar-fade {
   opacity: 1;
   transform: translateX(0);
+  max-width: 200px;
   pointer-events: auto;
   transition-delay: 60ms;
 }
