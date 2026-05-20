@@ -18,9 +18,8 @@ import {
   Calendar,
   GraduationCap,
 } from "lucide-react";
-import { DockwizeLogo, DockwizeMark } from "@/components/dockwize-logo";
+import { DockwizeMark } from "@/components/dockwize-logo";
 import { Badge } from "@/components/ui/badge";
-import { SidebarAgenda } from "@/components/sidebar-agenda";
 import { Pin, PinOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/types";
@@ -159,18 +158,28 @@ export function Sidebar({ role }: SidebarProps) {
     <aside
       data-tour="sidebar-nav"
       data-pinned={pinned ? "true" : "false"}
-      className="dw-sidebar hidden h-full shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] md:flex"
+      className="dw-sidebar hidden h-full shrink-0 flex-col overflow-hidden border-r border-[var(--color-border)] bg-[var(--color-surface)] md:flex"
     >
       <div className="flex h-14 items-center border-b border-[var(--color-border)]">
-        <Link href="/" className="block" aria-label="Dockwize Werkmap">
-          {/* Rail: gecentreerd in de 64px-kolom, ruim genoeg */}
-          <div className="dw-sidebar-mark-only h-14 w-16 items-center justify-center">
-            <DockwizeMark size={26} />
-          </div>
-          {/* Open: links uitgelijnd met eigen padding */}
-          <div className="dw-sidebar-full-only h-14 items-center pl-5">
-            <DockwizeLogo size="md" />
-          </div>
+        <Link
+          href="/"
+          aria-label="Dockwize Werkmap"
+          className="flex h-14 items-center gap-2.5"
+        >
+          {/* Mark altijd zichtbaar, gecentreerd in 64px-kolom */}
+          <span className="flex w-16 items-center justify-center">
+            <DockwizeMark size={28} />
+          </span>
+          {/* Wordmark + suffix: faden in zodra sidebar opent. Bij rail
+              (sidebar 64px, overflow-hidden op aside) blijft dit uit beeld. */}
+          <span className="dw-sidebar-fade flex flex-col leading-none">
+            <span className="text-[17px] font-semibold tracking-tight text-[var(--color-ink)]">
+              Dockwize
+            </span>
+            <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[var(--color-ink-3)]">
+              Werkmap
+            </span>
+          </span>
         </Link>
       </div>
       <nav className="flex-1 overflow-y-auto overflow-x-hidden p-2">
@@ -226,11 +235,6 @@ export function Sidebar({ role }: SidebarProps) {
           </div>
         ))}
       </nav>
-
-      {/* Agenda-widget alleen in open-state */}
-      <div className="dw-sidebar-open-only">
-        <SidebarAgenda />
-      </div>
 
       {/* Pin toggle */}
       <div className="border-t border-[var(--color-border)] p-2">

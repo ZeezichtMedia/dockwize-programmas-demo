@@ -83,18 +83,16 @@ export function DockwizeLogo({
 
 export function DockwizeMark({ className, size = 32 }: { className?: string; size?: number }) {
   // De gele D + drie stippen uit het officiële Dockwize-wordmark.
-  // Coördinaten en transforms zijn 1-op-1 overgenomen uit
-  // dockwize.nl/templates/elloro/img/logo.svg. ViewBox laat het
-  // rechterdeel van de full-logo SVG zien (de wordmark zit links
-  // ervan en valt buiten beeld).
-  const height = size;
-  const width = Math.round((size / 50) * 35);
+  // Paden 1-op-1 uit dockwize.nl/templates/elloro/img/logo.svg.
+  // ViewBox dekt het gehele D-deel (incl. de rechterronding van de D
+  // die door de arc rx=25 nog 25 units extra naar rechts bult t.o.v.
+  // het laatste path-coord) plus de drie stippen rechts ernaast.
   return (
     <svg
-      viewBox="92 -2 35 54"
+      viewBox="91 -3 56 56"
       xmlns="http://www.w3.org/2000/svg"
-      width={width}
-      height={height}
+      width={size}
+      height={size}
       className={className}
       aria-label="Dockwize"
     >

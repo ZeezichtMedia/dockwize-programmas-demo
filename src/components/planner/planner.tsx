@@ -189,7 +189,12 @@ export function Planner() {
   }
 
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      autoScroll={false}
+    >
       <div className="flex h-full overflow-hidden">
         <PlannerBacklog
           entrepreneurs={allEntrepreneurs}
