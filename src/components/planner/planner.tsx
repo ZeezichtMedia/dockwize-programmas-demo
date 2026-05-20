@@ -14,12 +14,14 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
 import { PlannerBacklog } from "./planner-backlog";
-import { PlannerWeek, type PlannedSession } from "./planner-week";
+import { PlannerWeek, type PlannedSession, type PlannerView } from "./planner-week";
 import { PlannerCardOverlay } from "./planner-card";
+import { EntrepreneurDetailModal } from "./entrepreneur-detail-modal";
+import { SessionDetailModal } from "./session-detail-modal";
+import { QuickPlanDialog } from "@/components/quick-plan-dialog";
 import { useUser } from "@/lib/auth-context";
 import {
   plannerEntrepreneursFor,
-  isSameDay,
   HOUR_SLOTS,
 } from "@/lib/mock/planner";
 import { sessionProposals } from "@/lib/mock/sessions";
@@ -32,15 +34,18 @@ export function Planner() {
     [user.id]
   );
 
-  const [refDate, setRefDate] = React.useState<Date>(new Date("2026-05-11")); // maandag 11 mei
+  const [view, setView] = React.useState<PlannerView>("week");
+  const [refDate, setRefDate] = React.useState<Date>(new Date("2026-05-11"));
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [activeDrag, setActiveDrag] = React.useState<string | null>(null);
   const [plannedSessions, setPlannedSessions] = React.useState<PlannedSession[]>(() =>
     seedFromProposals(user.id, user.role)
   );
   const [confirmToast, setConfirmToast] = React.useState<string | null>(null);
+  const [detailEntrepreneurId, setDetailEntrepreneurId] = React.useState<string | null>(null);
+  const [detailSessionId, setDetailSessionId] = React.useState<string | null>(null);
+  const [planDialogFor, setPlanDialogFor] = React.useState<string | null>(null);
 
-  // Re-seed wanneer user wisselt
   React.useEffect(() => {
     setPlannedSessions(seedFromProposals(user.id, user.role));
     setSelectedIds(new Set());
@@ -54,7 +59,6 @@ export function Planner() {
   const cohortId = user.cohortId ?? "c_jp7";
   const readOnly = user.role === "entrepreneur" || user.role === "super_admin";
 
-  // ─── Selection ────────────────────────────────────────────────────────
   const onSelectToggle = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -65,13 +69,11 @@ export function Planner() {
   };
 
   const onSelectRange = (id: string) => {
-    // Simpel: voeg toe (zelfde gedrag als toggle additive)
     setSelectedIds((prev) => new Set([...prev, id]));
   };
 
   const onClearSelection = () => setSelectedIds(new Set());
 
-  // ─── Drag-drop ────────────────────────────────────────────────────────
   const handleDragStart = (e: DragStartEvent) => {
     setActiveDrag(String(e.active.id));
   };
@@ -85,7 +87,6 @@ export function Planner() {
     const activeId = String(e.active.id);
     const draggedEntId = activeId.replace("entrepreneur:", "");
 
-    // Bepaal alle ondernemers in de drop: selected (als de gedragen er onderdeel van is) of alleen de gedragen
     const idsToPlace = selectedIds.has(draggedEntId)
       ? Array.from(selectedIds)
       : [draggedEntId];
@@ -94,7 +95,6 @@ export function Planner() {
     idsToPlace.forEach((entId, idx) => {
       const entrepreneur = allEntrepreneurs.find((e) => e.user.id === entId);
       if (!entrepreneur) return;
-      // Spreiden over opeenvolgende uren als meerdere
       const hour = Math.min(overData.hour + idx, HOUR_SLOTS[HOUR_SLOTS.length - 1]);
       newSessions.push({
         id: `planned_${Date.now()}_${entId}`,
@@ -123,10 +123,11 @@ export function Planner() {
     setPlannedSessions((prev) => prev.filter((s) => s.id !== id));
   };
 
-  const shiftWeek = (delta: number) => {
+  const shift = (delta: number) => {
     setRefDate((prev) => {
       const next = new Date(prev);
-      next.setDate(prev.getDate() + delta * 7);
+      if (view === "week") next.setDate(prev.getDate() + delta * 7);
+      else next.setMonth(prev.getMonth() + delta);
       return next;
     });
   };
@@ -137,11 +138,9 @@ export function Planner() {
     ? allEntrepreneurs.find((e) => `entrepreneur:${e.user.id}` === activeDrag)
     : undefined;
 
-  // De groep die in de drag-overlay verschijnt: huidige drag + selectie
   const dragOverlayItems: PlannerEntrepreneur[] = [];
   if (activeEntrepreneur) {
     if (selectedIds.has(activeEntrepreneur.user.id)) {
-      // Alle geselecteerden tonen
       selectedIds.forEach((id) => {
         const e = allEntrepreneurs.find((x) => x.user.id === id);
         if (e) dragOverlayItems.push(e);
@@ -151,14 +150,23 @@ export function Planner() {
     }
   }
 
+  const detailEntrepreneur = detailEntrepreneurId
+    ? allEntrepreneurs.find((e) => e.user.id === detailEntrepreneurId) ?? null
+    : null;
+  const detailSession = detailSessionId
+    ? plannedSessions.find((s) => s.id === detailSessionId) ?? null
+    : null;
+
   if (allEntrepreneurs.length === 0) {
-    // Read-only view voor ondernemer
     return (
       <PlannerWeek
         refDate={refDate}
-        onShiftWeek={shiftWeek}
+        view={view}
+        onViewChange={setView}
+        onShift={shift}
         onToday={jumpToToday}
         plannedSessions={plannedSessions}
+        onOpenSession={setDetailSessionId}
         cohortId={cohortId}
         readOnly
       />
@@ -174,14 +182,18 @@ export function Planner() {
           onSelectToggle={onSelectToggle}
           onSelectRange={onSelectRange}
           onClearSelection={onClearSelection}
+          onOpenEntrepreneur={setDetailEntrepreneurId}
         />
         <div className="flex-1 overflow-hidden">
           <PlannerWeek
             refDate={refDate}
-            onShiftWeek={shiftWeek}
+            view={view}
+            onViewChange={setView}
+            onShift={shift}
             onToday={jumpToToday}
             plannedSessions={plannedSessions}
             onRemoveSession={onRemoveSession}
+            onOpenSession={setDetailSessionId}
             cohortId={cohortId}
             readOnly={readOnly}
           />
@@ -192,7 +204,35 @@ export function Planner() {
         {dragOverlayItems.length > 0 && <PlannerCardOverlay entrepreneurs={dragOverlayItems} />}
       </DragOverlay>
 
-      {/* Toast */}
+      <EntrepreneurDetailModal
+        open={!!detailEntrepreneur}
+        onOpenChange={(o) => !o && setDetailEntrepreneurId(null)}
+        entrepreneur={detailEntrepreneur}
+        onPlan={!readOnly ? (id) => {
+          setDetailEntrepreneurId(null);
+          setPlanDialogFor(id);
+        } : undefined}
+      />
+
+      <SessionDetailModal
+        open={!!detailSession}
+        onOpenChange={(o) => !o && setDetailSessionId(null)}
+        session={detailSession}
+        onRemove={readOnly ? undefined : (id) => {
+          onRemoveSession(id);
+          setDetailSessionId(null);
+        }}
+      />
+
+      {planDialogFor && (
+        <QuickPlanDialog
+          open={!!planDialogFor}
+          onOpenChange={(o) => !o && setPlanDialogFor(null)}
+          availableEntrepreneurs={allEntrepreneurs.map((e) => e.user)}
+          defaultEntrepreneurId={planDialogFor}
+        />
+      )}
+
       <AnimatePresence>
         {confirmToast && (
           <motion.div
@@ -215,15 +255,9 @@ export function Planner() {
 
 function seedFromProposals(viewerId: string, role: string): PlannedSession[] {
   const accepted = sessionProposals.filter((p) => p.status === "accepted" && p.acceptedSlot);
-  // Voor demo: laat alle accepted sessies zien voor admin/manager/coach.
-  // Voor ondernemer: alleen eigen.
   return accepted
     .filter((p) => {
       if (role === "entrepreneur") return p.entrepreneurId === viewerId;
-      if (role === "coach") {
-        // Eigen + waarneming. Voor demo: gewoon alle accepted laten zien
-        return true;
-      }
       return true;
     })
     .map((p) => {

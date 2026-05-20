@@ -172,6 +172,28 @@ export function weekDays(refDate: Date): Date[] {
   });
 }
 
+/**
+ * Maand-grid: alle dagen die in de maand-view zichtbaar zijn (incl. spill-over
+ * dagen uit voorgaande/volgende maand om de eerste week op maandag en de
+ * laatste op zondag te starten). 6 rijen × 7 kolommen = 42 dagen.
+ */
+export function monthGridDays(refDate: Date): Date[] {
+  const year = refDate.getFullYear();
+  const month = refDate.getMonth();
+  const first = new Date(year, month, 1);
+  // Backtrack to Monday before (or on) the first
+  const firstDay = first.getDay(); // 0 zo … 6 za
+  const backtrack = firstDay === 0 ? 6 : firstDay - 1;
+  const start = new Date(first);
+  start.setDate(first.getDate() - backtrack);
+  start.setHours(0, 0, 0, 0);
+  return Array.from({ length: 42 }, (_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    return d;
+  });
+}
+
 export function isSameDay(a: Date, b: Date): boolean {
   return (
     a.getFullYear() === b.getFullYear() &&
@@ -180,8 +202,32 @@ export function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
+export function isSameMonth(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+}
+
 export function isToday(d: Date): boolean {
   return isSameDay(d, TODAY);
 }
 
+export function fullMonthLabel(d: Date): string {
+  return d.toLocaleDateString("nl-NL", { month: "long", year: "numeric" });
+}
+
 export const HOUR_SLOTS = [9, 10, 11, 12, 13, 14, 15, 16, 17];
+
+export const ALL_PLANNER_STATUSES: PlannerStatus[] = [
+  "submitted_waiting",
+  "inactive",
+  "needs_planning",
+  "fresh",
+  "scheduled",
+];
+
+export const plannerStatusLabel: Record<PlannerStatus, string> = {
+  submitted_waiting: "Wacht op feedback-moment",
+  inactive: "Inactief 7+ dagen",
+  needs_planning: "Geen sessie binnen 14 dagen",
+  fresh: "Nieuw, 3 startsessies plannen",
+  scheduled: "Loopt op schema",
+};

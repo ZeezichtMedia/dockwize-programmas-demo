@@ -1,13 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { ChevronDown, ChevronRight, Filter, Search, Users, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Search, Users, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { PlannerCard } from "./planner-card";
-import { statusGrouping } from "@/lib/mock/planner";
-import { coaches, getUser } from "@/lib/mock/users";
-import { programs } from "@/lib/mock/programs";
+import { MultiFilter } from "./multi-filter";
+import {
+  statusGrouping,
+  ALL_PLANNER_STATUSES,
+  plannerStatusLabel,
+  plannerStatusTone,
+} from "@/lib/mock/planner";
+import { coaches } from "@/lib/mock/users";
+import { programs, cohorts } from "@/lib/mock/programs";
 import type { PlannerEntrepreneur, PlannerStatus } from "@/lib/mock/planner";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +23,7 @@ interface PlannerBacklogProps {
   onSelectToggle: (id: string) => void;
   onSelectRange: (id: string) => void;
   onClearSelection: () => void;
+  onOpenEntrepreneur?: (id: string) => void;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
 }
@@ -27,15 +34,48 @@ export function PlannerBacklog({
   onSelectToggle,
   onSelectRange,
   onClearSelection,
+  onOpenEntrepreneur,
   collapsed,
   onToggleCollapse,
 }: PlannerBacklogProps) {
   const [search, setSearch] = React.useState("");
-  const [filterCoach, setFilterCoach] = React.useState<string | null>(null);
-  const [filterProgram, setFilterProgram] = React.useState<string | null>(null);
+  const [filterCoaches, setFilterCoaches] = React.useState<Set<string>>(new Set(coaches.map((c) => c.id)));
+  const [filterPrograms, setFilterPrograms] = React.useState<Set<string>>(new Set(programs.map((p) => p.id)));
+  const [filterStatuses, setFilterStatuses] = React.useState<Set<PlannerStatus>>(new Set(ALL_PLANNER_STATUSES));
+
   const [expandedGroups, setExpandedGroups] = React.useState<Set<PlannerStatus>>(
     new Set(["submitted_waiting", "inactive", "needs_planning", "fresh"])
   );
+
+  // Counts per filter-categorie (voor display in dropdown meta)
+  const coachCounts = React.useMemo(() => {
+    const map = new Map<string, number>();
+    entrepreneurs.forEach((e) => {
+      if (e.user.coachId) {
+        map.set(e.user.coachId, (map.get(e.user.coachId) ?? 0) + 1);
+      }
+    });
+    return map;
+  }, [entrepreneurs]);
+
+  const programCounts = React.useMemo(() => {
+    const map = new Map<string, number>();
+    entrepreneurs.forEach((e) => {
+      const cohort = cohorts.find((c) => c.id === e.user.cohortId);
+      if (cohort) {
+        map.set(cohort.programId, (map.get(cohort.programId) ?? 0) + 1);
+      }
+    });
+    return map;
+  }, [entrepreneurs]);
+
+  const statusCounts = React.useMemo(() => {
+    const map = new Map<PlannerStatus, number>();
+    entrepreneurs.forEach((e) => {
+      map.set(e.status, (map.get(e.status) ?? 0) + 1);
+    });
+    return map;
+  }, [entrepreneurs]);
 
   const filtered = entrepreneurs.filter((e) => {
     if (search) {
@@ -46,17 +86,12 @@ export function PlannerBacklog({
       )
         return false;
     }
-    if (filterCoach && e.user.coachId !== filterCoach) return false;
-    if (filterProgram) {
-      const program = programs.find((p) => p.id === filterProgram);
-      if (program) {
-        // entrepreneur's cohort moet onder dit programma vallen
-        // We hebben geen directe programId op user, dus via cohortId...
-        // Simpel: alle entrepreneurs in p_jouw cohort, dus filter doet alleen wat als p.id !== huidige
-        // Voor demo: behandel alleen "p_jouw" als match, anders niets tonen
-        if (filterProgram !== "p_jouw") return false;
-      }
+    if (e.user.coachId && !filterCoaches.has(e.user.coachId)) return false;
+    if (e.user.cohortId) {
+      const cohort = cohorts.find((c) => c.id === e.user.cohortId);
+      if (cohort && !filterPrograms.has(cohort.programId)) return false;
     }
+    if (!filterStatuses.has(e.status)) return false;
     return true;
   });
 
@@ -76,8 +111,7 @@ export function PlannerBacklog({
     });
   };
 
-  const totalActions =
-    filtered.filter((e) => e.status !== "scheduled").length;
+  const totalActions = filtered.filter((e) => e.status !== "scheduled").length;
 
   if (collapsed) {
     return (
@@ -98,7 +132,7 @@ export function PlannerBacklog({
   }
 
   return (
-    <aside className="flex h-full w-[300px] shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)]">
+    <aside className="flex h-full w-[320px] shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)]">
       <div className="border-b border-[var(--color-border)] p-3">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -112,7 +146,7 @@ export function PlannerBacklog({
             <button
               onClick={onToggleCollapse}
               className="rounded p-1 text-[var(--color-ink-3)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-ink)]"
-              title="Collapse"
+              title="Inklappen"
             >
               <ChevronDown className="size-3.5 rotate-90" />
             </button>
@@ -125,53 +159,56 @@ export function PlannerBacklog({
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Zoek…"
-            className="h-7 pl-7 text-[12px]"
+            placeholder="Zoek op naam of bedrijf…"
+            className="h-8 pl-7 text-[12px]"
           />
         </div>
 
-        {/* Filters */}
-        <div className="space-y-1.5">
-          <FilterRow icon={Filter} label="Coach">
-            <ChipScroll>
-              <FilterChip active={!filterCoach} onClick={() => setFilterCoach(null)}>
-                Alle
-              </FilterChip>
-              {coaches.map((c) => (
-                <FilterChip
-                  key={c.id}
-                  active={filterCoach === c.id}
-                  onClick={() => setFilterCoach(c.id === filterCoach ? null : c.id)}
-                >
-                  {c.name.split(" ")[0]}
-                </FilterChip>
-              ))}
-            </ChipScroll>
-          </FilterRow>
-
-          <FilterRow icon={Filter} label="Programma">
-            <ChipScroll>
-              <FilterChip active={!filterProgram} onClick={() => setFilterProgram(null)}>
-                Alle
-              </FilterChip>
-              {programs.slice(0, 3).map((p) => (
-                <FilterChip
-                  key={p.id}
-                  active={filterProgram === p.id}
-                  onClick={() => setFilterProgram(p.id === filterProgram ? null : p.id)}
-                >
-                  {p.shortName}
-                </FilterChip>
-              ))}
-            </ChipScroll>
-          </FilterRow>
+        {/* Filter dropdowns */}
+        <div className="flex flex-wrap gap-1.5">
+          <MultiFilter
+            label="Status"
+            compact
+            options={ALL_PLANNER_STATUSES.map((s) => ({
+              id: s,
+              label: plannerStatusLabel[s],
+              dot: plannerStatusTone[s].dot,
+              meta: String(statusCounts.get(s) ?? 0),
+            }))}
+            selected={filterStatuses as Set<string>}
+            onChange={(next) => setFilterStatuses(next as Set<PlannerStatus>)}
+          />
+          <MultiFilter
+            label="Coach"
+            compact
+            options={coaches.map((c) => ({
+              id: c.id,
+              label: c.name,
+              meta: String(coachCounts.get(c.id) ?? 0),
+            }))}
+            selected={filterCoaches}
+            onChange={setFilterCoaches}
+          />
+          <MultiFilter
+            label="Programma"
+            compact
+            options={programs
+              .filter((p) => (programCounts.get(p.id) ?? 0) > 0)
+              .map((p) => ({
+                id: p.id,
+                label: p.shortName,
+                meta: String(programCounts.get(p.id) ?? 0),
+              }))}
+            selected={filterPrograms}
+            onChange={setFilterPrograms}
+          />
         </div>
 
-        {/* Multi-select actions */}
+        {/* Multi-select action bar */}
         {selectedIds.size > 0 && (
           <div className="mt-2 flex items-center justify-between rounded-[8px] bg-[var(--color-ink)] px-2.5 py-1.5 text-white">
             <p className="text-[11.5px] font-medium">{selectedIds.size} geselecteerd</p>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <p className="text-[10.5px] text-white/70">Sleep om te plannen</p>
               <button
                 onClick={onClearSelection}
@@ -199,7 +236,7 @@ export function PlannerBacklog({
         {grouped.length === 0 ? (
           <div className="flex h-full items-center justify-center p-6 text-center">
             <p className="text-[12px] text-[var(--color-ink-3)]">
-              Geen ondernemers passen bij dit filter.
+              Geen ondernemers passen bij de filters.
             </p>
           </div>
         ) : (
@@ -224,6 +261,7 @@ export function PlannerBacklog({
                         selected={selectedIds.has(e.user.id)}
                         onSelectToggle={onSelectToggle}
                         onSelectRange={onSelectRange}
+                        onOpenDetail={onOpenEntrepreneur}
                       />
                     ))}
                   </div>
@@ -235,53 +273,8 @@ export function PlannerBacklog({
       </div>
 
       <div className="border-t border-[var(--color-border)] p-2.5 text-[10px] text-[var(--color-muted)]">
-        Tip: <kbd className="rounded border border-[var(--color-border)] bg-[var(--color-surface-2)] px-1 font-mono">⌘</kbd>-klik voor multi-select.
+        Tip: <kbd className="rounded border border-[var(--color-border)] bg-[var(--color-surface-2)] px-1 font-mono">⌘</kbd>-klik voor multi-select · klik op kaart voor details.
       </div>
     </aside>
-  );
-}
-
-function FilterRow({
-  icon: Icon,
-  label,
-  children,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <p className="w-[60px] shrink-0 text-[10.5px] font-medium text-[var(--color-muted)]">{label}</p>
-      {children}
-    </div>
-  );
-}
-
-function ChipScroll({ children }: { children: React.ReactNode }) {
-  return <div className="scrollbar-hide flex flex-1 gap-1 overflow-x-auto">{children}</div>;
-}
-
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "shrink-0 rounded-full border px-2 py-0.5 text-[10.5px] font-medium transition-colors",
-        active
-          ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-white"
-          : "border-[var(--color-border)] text-[var(--color-ink-2)] hover:border-[var(--color-border-strong)]"
-      )}
-    >
-      {children}
-    </button>
   );
 }

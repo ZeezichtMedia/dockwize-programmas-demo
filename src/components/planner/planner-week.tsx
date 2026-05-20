@@ -4,15 +4,25 @@ import * as React from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { ChevronLeft, ChevronRight, Clock, MapPin, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { GradientAvatar } from "@/components/user-pill";
 import { UserAvatar } from "@/components/ui/avatar";
 import { getUser } from "@/lib/mock/users";
 import { eventsForCohort } from "@/lib/mock/notifications";
-import { HOUR_SLOTS, isSameDay, isToday, weekDays } from "@/lib/mock/planner";
+import {
+  HOUR_SLOTS,
+  isSameDay,
+  isSameMonth,
+  isToday,
+  monthGridDays,
+  weekDays,
+  fullMonthLabel,
+} from "@/lib/mock/planner";
 import { cn } from "@/lib/utils";
 
-const DAY_NAMES = ["ma", "di", "wo", "do", "vr"];
+const DAY_NAMES_SHORT = ["ma", "di", "wo", "do", "vr"];
+const DAY_NAMES_MONTH = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
+
+export type PlannerView = "week" | "month";
 
 export interface PlannedSession {
   id: string;
@@ -28,54 +38,124 @@ export interface PlannedSession {
 
 interface PlannerWeekProps {
   refDate: Date;
-  onShiftWeek: (delta: number) => void;
+  view: PlannerView;
+  onViewChange: (v: PlannerView) => void;
+  onShift: (delta: number) => void;
   onToday: () => void;
   plannedSessions: PlannedSession[];
   onRemoveSession?: (id: string) => void;
+  onOpenSession?: (id: string) => void;
   cohortId?: string;
   readOnly?: boolean;
 }
 
 export function PlannerWeek({
   refDate,
-  onShiftWeek,
+  view,
+  onViewChange,
+  onShift,
   onToday,
   plannedSessions,
   onRemoveSession,
+  onOpenSession,
   cohortId,
   readOnly,
 }: PlannerWeekProps) {
   const days = React.useMemo(() => weekDays(refDate), [refDate]);
+  const monthDays = React.useMemo(() => monthGridDays(refDate), [refDate]);
   const cohortEvents = cohortId ? eventsForCohort(cohortId) : [];
 
-  const weekStart = days[0];
-  const weekEnd = days[4];
-  const headerLabel = `${weekStart.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })} – ${weekEnd.toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })}`;
+  const headerLabel =
+    view === "week"
+      ? `${days[0].toLocaleDateString("nl-NL", { day: "numeric", month: "short" })} – ${days[4].toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })}`
+      : fullMonthLabel(refDate);
 
   return (
     <div className="flex h-full flex-col bg-[var(--color-bg)]">
       {/* Toolbar */}
       <div className="flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2">
         <div className="flex items-center gap-1.5">
-          <Button variant="ghost" size="icon-sm" onClick={() => onShiftWeek(-1)} aria-label="Vorige week">
+          <Button variant="ghost" size="icon-sm" onClick={() => onShift(-1)} aria-label="Vorige">
             <ChevronLeft className="size-4" />
           </Button>
           <Button variant="secondary" size="sm" onClick={onToday}>
             Vandaag
           </Button>
-          <Button variant="ghost" size="icon-sm" onClick={() => onShiftWeek(1)} aria-label="Volgende week">
+          <Button variant="ghost" size="icon-sm" onClick={() => onShift(1)} aria-label="Volgende">
             <ChevronRight className="size-4" />
           </Button>
           <p className="ml-2 text-[13.5px] font-semibold tracking-tight">{headerLabel}</p>
         </div>
-        <div className="flex items-center gap-3 text-[10.5px] text-[var(--color-ink-3)]">
-          <LegendDot color="bg-blue-500" label="1-op-1" />
-          <LegendDot color="bg-[var(--color-ink)]" label="Groepssessie" />
-          <LegendDot color="bg-red-500" label="Deadline" />
+        <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-3 text-[10.5px] text-[var(--color-ink-3)] md:flex">
+            <LegendDot color="bg-blue-500" label="1-op-1" />
+            <LegendDot color="bg-[var(--color-ink)]" label="Groepssessie" />
+          </div>
+          <ViewToggle view={view} onChange={onViewChange} />
         </div>
       </div>
 
-      {/* Day headers */}
+      {view === "week" ? (
+        <WeekGrid
+          days={days}
+          plannedSessions={plannedSessions}
+          cohortEvents={cohortEvents}
+          onRemoveSession={readOnly ? undefined : onRemoveSession}
+          onOpenSession={onOpenSession}
+          readOnly={readOnly}
+        />
+      ) : (
+        <MonthGrid
+          days={monthDays}
+          monthOf={refDate}
+          plannedSessions={plannedSessions}
+          cohortEvents={cohortEvents}
+          onOpenSession={onOpenSession}
+          readOnly={readOnly}
+        />
+      )}
+    </div>
+  );
+}
+
+function ViewToggle({ view, onChange }: { view: PlannerView; onChange: (v: PlannerView) => void }) {
+  return (
+    <div className="inline-flex items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface)] p-0.5">
+      {(["week", "month"] as PlannerView[]).map((v) => (
+        <button
+          key={v}
+          onClick={() => onChange(v)}
+          className={cn(
+            "rounded-[6px] px-2.5 py-1 text-[11.5px] font-medium transition-colors",
+            view === v
+              ? "bg-[var(--color-ink)] text-white"
+              : "text-[var(--color-ink-2)] hover:text-[var(--color-ink)]"
+          )}
+        >
+          {v === "week" ? "Week" : "Maand"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function WeekGrid({
+  days,
+  plannedSessions,
+  cohortEvents,
+  onRemoveSession,
+  onOpenSession,
+  readOnly,
+}: {
+  days: Date[];
+  plannedSessions: PlannedSession[];
+  cohortEvents: ReturnType<typeof eventsForCohort>;
+  onRemoveSession?: (id: string) => void;
+  onOpenSession?: (id: string) => void;
+  readOnly?: boolean;
+}) {
+  return (
+    <>
       <div className="grid border-b border-[var(--color-border)] bg-[var(--color-surface)]" style={{ gridTemplateColumns: "60px repeat(5, 1fr)" }}>
         <div />
         {days.map((d, i) => (
@@ -87,7 +167,7 @@ export function PlannerWeek({
             )}
           >
             <p className="text-[10px] uppercase tracking-wider text-[var(--color-muted)]">
-              {DAY_NAMES[i]}
+              {DAY_NAMES_SHORT[i]}
             </p>
             <p className={cn("text-[18px] font-semibold leading-none", isToday(d) && "text-[var(--color-ink)]")}>
               {d.getDate()}
@@ -99,7 +179,6 @@ export function PlannerWeek({
         ))}
       </div>
 
-      {/* Grid body */}
       <div className="flex-1 overflow-y-auto">
         <div className="grid" style={{ gridTemplateColumns: "60px repeat(5, 1fr)" }}>
           {HOUR_SLOTS.map((hour, hourIdx) => (
@@ -109,24 +188,23 @@ export function PlannerWeek({
               </div>
               {days.map((day, dayIdx) => {
                 const sessions = plannedSessions.filter(
-                  (s) =>
-                    s.day === day.toISOString().slice(0, 10) && s.hour === hour
+                  (s) => s.day === day.toISOString().slice(0, 10) && s.hour === hour
                 );
                 const groupEvents = cohortEvents.filter((e) => {
                   const eDate = new Date(e.start);
                   return isSameDay(eDate, day) && eDate.getHours() === hour;
                 });
                 return (
-                  <PlannerCell
+                  <WeekCell
                     key={`${day.toISOString()}-${hour}`}
                     day={day}
                     hour={hour}
                     sessions={sessions}
                     groupEvents={groupEvents}
                     onRemoveSession={onRemoveSession}
+                    onOpenSession={onOpenSession}
                     readOnly={readOnly}
                     isLastRow={hourIdx === HOUR_SLOTS.length - 1}
-                    isLastCol={dayIdx === days.length - 1}
                   />
                 );
               })}
@@ -134,28 +212,28 @@ export function PlannerWeek({
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
-function PlannerCell({
+function WeekCell({
   day,
   hour,
   sessions,
   groupEvents,
   onRemoveSession,
+  onOpenSession,
   readOnly,
   isLastRow,
-  isLastCol,
 }: {
   day: Date;
   hour: number;
   sessions: PlannedSession[];
   groupEvents: ReturnType<typeof eventsForCohort>;
   onRemoveSession?: (id: string) => void;
+  onOpenSession?: (id: string) => void;
   readOnly?: boolean;
   isLastRow: boolean;
-  isLastCol: boolean;
 }) {
   const dayKey = day.toISOString().slice(0, 10);
   const dropId = `slot:${dayKey}:${hour}`;
@@ -177,7 +255,6 @@ function PlannerCell({
         isOver && "bg-[var(--color-accent)]/40 ring-2 ring-inset ring-[var(--color-ink)]"
       )}
     >
-      {/* Group events first (immovable) */}
       {groupEvents.map((ev) => (
         <div
           key={ev.id}
@@ -195,14 +272,17 @@ function PlannerCell({
         </div>
       ))}
 
-      {/* Planned 1-on-1's */}
       <div className={cn("flex flex-col gap-1 p-1", groupEvents.length > 0 && "pt-8")}>
         {sessions.map((s) => (
-          <SessionTile key={s.id} session={s} onRemove={readOnly ? undefined : onRemoveSession} />
+          <SessionTile
+            key={s.id}
+            session={s}
+            onRemove={readOnly ? undefined : onRemoveSession}
+            onOpen={onOpenSession}
+          />
         ))}
       </div>
 
-      {/* Empty hint when isOver */}
       {isOver && sessions.length === 0 && groupEvents.length === 0 && (
         <div className="absolute inset-2 flex items-center justify-center rounded-[6px] border-2 border-dashed border-[var(--color-ink)] bg-white/60 text-[10.5px] font-medium text-[var(--color-ink)]">
           Drop hier
@@ -212,12 +292,183 @@ function PlannerCell({
   );
 }
 
+function MonthGrid({
+  days,
+  monthOf,
+  plannedSessions,
+  cohortEvents,
+  onOpenSession,
+  readOnly,
+}: {
+  days: Date[];
+  monthOf: Date;
+  plannedSessions: PlannedSession[];
+  cohortEvents: ReturnType<typeof eventsForCohort>;
+  onOpenSession?: (id: string) => void;
+  readOnly?: boolean;
+}) {
+  return (
+    <>
+      <div
+        className="grid border-b border-[var(--color-border)] bg-[var(--color-surface)]"
+        style={{ gridTemplateColumns: "repeat(7, 1fr)" }}
+      >
+        {DAY_NAMES_MONTH.map((d) => (
+          <div key={d} className="border-l border-[var(--color-border)] px-2 py-1.5 text-center first:border-l-0">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-[var(--color-muted)]">{d}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        <div
+          className="grid h-full"
+          style={{ gridTemplateColumns: "repeat(7, 1fr)", gridAutoRows: "minmax(110px, 1fr)" }}
+        >
+          {days.map((day) => {
+            const dayKey = day.toISOString().slice(0, 10);
+            const sessions = plannedSessions.filter((s) => s.day === dayKey);
+            const groupEvents = cohortEvents.filter((e) => isSameDay(new Date(e.start), day));
+            return (
+              <MonthCell
+                key={dayKey}
+                day={day}
+                monthOf={monthOf}
+                sessions={sessions}
+                groupEvents={groupEvents}
+                onOpenSession={onOpenSession}
+                readOnly={readOnly}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function MonthCell({
+  day,
+  monthOf,
+  sessions,
+  groupEvents,
+  onOpenSession,
+  readOnly,
+}: {
+  day: Date;
+  monthOf: Date;
+  sessions: PlannedSession[];
+  groupEvents: ReturnType<typeof eventsForCohort>;
+  onOpenSession?: (id: string) => void;
+  readOnly?: boolean;
+}) {
+  const dayKey = day.toISOString().slice(0, 10);
+  const dropId = `day:${dayKey}`;
+  const { isOver, setNodeRef } = useDroppable({
+    id: dropId,
+    data: { kind: "slot", day: dayKey, hour: 14 }, // standaard 14:00 bij maand-drop
+    disabled: readOnly,
+  });
+
+  const today = isToday(day);
+  const inMonth = isSameMonth(day, monthOf);
+  const visibleSessions = sessions.slice(0, 2);
+  const remaining = sessions.length - visibleSessions.length;
+  const showGroupEvent = groupEvents[0];
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "relative flex flex-col gap-1 border-b border-l border-[var(--color-border)] p-1.5 transition-colors",
+        !inMonth && "bg-[var(--color-surface-2)]/30",
+        today && "bg-[var(--color-accent-soft)]/20",
+        isOver && "bg-[var(--color-accent)]/40 ring-2 ring-inset ring-[var(--color-ink)]"
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <span
+          className={cn(
+            "inline-flex size-5 items-center justify-center rounded-full text-[11px] font-semibold",
+            today && "bg-[var(--color-ink)] text-white",
+            !today && !inMonth && "text-[var(--color-muted)]",
+            !today && inMonth && "text-[var(--color-ink)]"
+          )}
+        >
+          {day.getDate()}
+        </span>
+        {(sessions.length > 0 || groupEvents.length > 0) && (
+          <span className="text-[9px] font-medium text-[var(--color-muted)]">
+            {sessions.length + groupEvents.length}
+          </span>
+        )}
+      </div>
+
+      {showGroupEvent && (
+        <div className="rounded-[4px] bg-[var(--color-ink)] px-1.5 py-0.5 text-[9.5px] font-medium text-white">
+          <p className="flex items-center gap-1 truncate">
+            <Sparkles className="size-2.5" /> {showGroupEvent.title}
+          </p>
+        </div>
+      )}
+
+      {visibleSessions.map((s) => (
+        <MonthSessionPill key={s.id} session={s} onOpen={onOpenSession} />
+      ))}
+
+      {remaining > 0 && (
+        <p className="mt-auto text-[9.5px] font-medium text-[var(--color-ink-3)]">
+          +{remaining} meer
+        </p>
+      )}
+
+      {isOver && (
+        <div className="pointer-events-none absolute inset-1 flex items-center justify-center rounded-[6px] border-2 border-dashed border-[var(--color-ink)] bg-white/60 text-[10px] font-medium text-[var(--color-ink)]">
+          Drop hier
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MonthSessionPill({
+  session,
+  onOpen,
+}: {
+  session: PlannedSession;
+  onOpen?: (id: string) => void;
+}) {
+  const ent = getUser(session.entrepreneurId);
+  if (!ent) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen?.(session.id)}
+      className="flex items-center gap-1.5 rounded-[4px] border border-blue-200 bg-blue-50/80 px-1 py-0.5 text-left hover:border-blue-400 hover:shadow-sm"
+    >
+      <span
+        className={cn(
+          "flex size-3.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[7px] font-bold text-white",
+          ent.gradient ?? "from-zinc-400 to-zinc-600"
+        )}
+      >
+        {ent.initials ?? ent.name[0]}
+      </span>
+      <span className="truncate text-[9.5px] font-medium text-[var(--color-ink)]">
+        {session.hour}:00 {ent.name.split(" ")[0]}
+      </span>
+    </button>
+  );
+}
+
 function SessionTile({
   session,
   onRemove,
+  onOpen,
 }: {
   session: PlannedSession;
   onRemove?: (id: string) => void;
+  onOpen?: (id: string) => void;
 }) {
   const ent = getUser(session.entrepreneurId);
   const coach = getUser(session.coachId);
@@ -227,8 +478,9 @@ function SessionTile({
 
   return (
     <div
+      onClick={() => onOpen?.(session.id)}
       className={cn(
-        "group relative rounded-[6px] border bg-white p-1.5 shadow-sm transition-all hover:shadow-md",
+        "group relative cursor-pointer rounded-[6px] border bg-white p-1.5 shadow-sm transition-all hover:shadow-md",
         isProposal
           ? "border-blue-300 bg-blue-50/80"
           : "border-[var(--color-accent)] bg-[var(--color-accent-soft)]/50"
@@ -251,7 +503,10 @@ function SessionTile({
       </div>
       {onRemove && (
         <button
-          onClick={() => onRemove(session.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(session.id);
+          }}
           className="absolute -right-1 -top-1 hidden size-4 items-center justify-center rounded-full bg-[var(--color-ink)] text-white shadow-md group-hover:flex"
           aria-label="Verwijder"
         >

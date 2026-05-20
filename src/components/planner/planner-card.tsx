@@ -16,6 +16,7 @@ interface PlannerCardProps {
   selected?: boolean;
   onSelectToggle?: (id: string) => void;
   onSelectRange?: (id: string) => void;
+  onOpenDetail?: (id: string) => void;
   disabled?: boolean;
   compact?: boolean;
 }
@@ -25,6 +26,7 @@ export function PlannerCard({
   selected,
   onSelectToggle,
   onSelectRange,
+  onOpenDetail,
   disabled,
   compact = false,
 }: PlannerCardProps) {
@@ -76,7 +78,13 @@ export function PlannerCard({
           (onSelectRange ?? onSelectToggle)?.(user.id);
           return;
         }
-        // Plain click: toggle als select-mode actief is
+        // Plain click: open detail-modal (heeft voorrang op selectie)
+        if (onOpenDetail) {
+          e.preventDefault();
+          onOpenDetail(user.id);
+          return;
+        }
+        // Fallback: toggle als select-mode actief is
         if (onSelectToggle && selected !== undefined) {
           onSelectToggle(user.id);
         }
