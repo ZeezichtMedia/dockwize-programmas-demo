@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   CalendarDays,
+  CalendarPlus,
   Check,
   Clock,
   Download,
@@ -34,6 +35,7 @@ import { EntrepreneurCoachAwayBanner } from "@/components/coach-away-banner";
 import { SessionProposalCard } from "@/components/session-proposal-card";
 import { openProposalForEntrepreneur } from "@/lib/mock/sessions";
 import { TeamMembersCard } from "@/components/team-members-card";
+import { RequestOneOnOneDialog } from "@/components/quick-plan-dialog";
 import { useUser } from "@/lib/auth-context";
 import { getFolderForEntrepreneur } from "@/lib/mock/workfolders";
 import { getUser } from "@/lib/mock/users";
@@ -76,6 +78,7 @@ export default function WerkmapPage() {
 
   const folders = Array.from(new Set(folder.files.map((f) => f.folder).filter(Boolean))) as string[];
   const openProposal = openProposalForEntrepreneur(user.id);
+  const [requestOpen, setRequestOpen] = React.useState(false);
 
   const filesShown = folder.files.filter((f) => {
     if (activeFolder && f.folder !== activeFolder) return false;
@@ -151,11 +154,11 @@ export default function WerkmapPage() {
               </div>
             </div>
             <div className="mt-3 flex gap-2">
-              <Button size="sm" variant="secondary" className="flex-1">
-                <MessageSquareReply className="size-3.5" /> Stuur bericht
+              <Button size="sm" variant="accent" className="flex-1" onClick={() => setRequestOpen(true)}>
+                <CalendarPlus className="size-3.5" /> Vraag 1-op-1 aan
               </Button>
-              <Button size="sm" variant="ghost">
-                <CalendarDays className="size-3.5" />
+              <Button size="sm" variant="secondary">
+                <MessageSquareReply className="size-3.5" /> Bericht
               </Button>
             </div>
           </motion.div>
@@ -413,6 +416,8 @@ Voor Bram: vragen of hij me kan helpen met landing page conversion.`}
 
         <RetentionFooter days={folder.retentionDays} />
       </div>
+
+      <RequestOneOnOneDialog open={requestOpen} onOpenChange={setRequestOpen} coach={coach} />
     </>
   );
 }

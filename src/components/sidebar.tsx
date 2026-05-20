@@ -15,10 +15,12 @@ import {
   Building2,
   ClipboardList,
   Archive,
+  Calendar,
   GraduationCap,
 } from "lucide-react";
 import { DockwizeLogo } from "@/components/dockwize-logo";
 import { Badge } from "@/components/ui/badge";
+import { SidebarAgenda } from "@/components/sidebar-agenda";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/lib/types";
 
@@ -40,6 +42,7 @@ const navByRole: Record<Role, NavGroup[]> = {
       items: [
         { label: "Mijn werkmap", href: "/werkmap", icon: Folder },
         { label: "Mijn groep", href: "/cohort", icon: Users },
+        { label: "Agenda", href: "/agenda", icon: Calendar },
         { label: "Bibliotheek", href: "/bibliotheek", icon: Library },
         { label: "Vraag de bibliotheek", href: "/ai", icon: Sparkles, badge: "AI" },
       ],
@@ -55,6 +58,7 @@ const navByRole: Record<Role, NavGroup[]> = {
     {
       items: [
         { label: "Mijn ondernemers", href: "/coach", icon: Users },
+        { label: "Agenda", href: "/agenda", icon: Calendar },
         { label: "Activiteit", href: "/coach/activiteit", icon: ClipboardList },
         { label: "Inbox", href: "/inbox", icon: Inbox, badge: 2 },
         { label: "Bibliotheek", href: "/bibliotheek", icon: Library },
@@ -65,6 +69,7 @@ const navByRole: Record<Role, NavGroup[]> = {
     {
       items: [
         { label: "Mijn programma's", href: "/programma-manager", icon: GraduationCap },
+        { label: "Agenda", href: "/agenda", icon: Calendar },
         { label: "Content publiceren", href: "/admin/content", icon: Library },
         { label: "Groepen", href: "/admin/cohorts", icon: Users },
         { label: "Inbox", href: "/inbox", icon: Inbox },
@@ -75,6 +80,7 @@ const navByRole: Record<Role, NavGroup[]> = {
     {
       items: [
         { label: "Overzicht", href: "/admin", icon: LayoutDashboard },
+        { label: "Agenda", href: "/agenda", icon: Calendar },
         { label: "Ondernemers", href: "/admin/users", icon: Building2 },
         { label: "Groepen", href: "/admin/cohorts", icon: Users },
         { label: "Coaches", href: "/admin/coaches", icon: GraduationCap },
@@ -95,6 +101,7 @@ const navByRole: Record<Role, NavGroup[]> = {
     {
       items: [
         { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+        { label: "Agenda", href: "/agenda", icon: Calendar },
         { label: "Programma's", href: "/admin/programmas", icon: GraduationCap },
         { label: "Groepen", href: "/admin/cohorts", icon: Users },
         { label: "Ondernemers", href: "/admin/users", icon: Building2 },
@@ -130,7 +137,7 @@ export function Sidebar({ role }: SidebarProps) {
   const groups = navByRole[role] ?? navByRole.entrepreneur;
 
   return (
-    <aside data-tour="sidebar-nav" className="hidden h-full w-[244px] shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] md:flex">
+    <aside data-tour="sidebar-nav" className="hidden h-full w-[260px] shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] md:flex">
       <div className="flex h-14 items-center border-b border-[var(--color-border)] px-5">
         <Link href="/" className="block">
           <DockwizeLogo size="md" />
@@ -184,16 +191,7 @@ export function Sidebar({ role }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="border-t border-[var(--color-border)] p-3">
-        <div className="rounded-[10px] bg-gradient-to-br from-[var(--color-accent-soft)] to-[#ffe687] p-3">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--color-ink)]/70">
-            Conceptdemo
-          </p>
-          <p className="mt-1 text-[12px] leading-snug text-[var(--color-ink)]">
-            Wissel rechtsboven van rol om te zien hoe de tool er voor de coach, programmamanager, coördinator of Pascal uitziet.
-          </p>
-        </div>
-      </div>
+      <SidebarAgenda />
     </aside>
   );
 }

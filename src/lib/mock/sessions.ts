@@ -67,3 +67,19 @@ export function openProposalForEntrepreneur(entrepreneurId: string): SessionProp
 export function proposalsForCoach(coachId: string): SessionProposal[] {
   return sessionProposals.filter((p) => p.coachId === coachId);
 }
+
+export interface AgendaItem {
+  id: string;
+  kind: "session" | "deadline" | "event" | "oneonone";
+  start: string;
+  end?: string;
+  title: string;
+  location?: string;
+  description?: string;
+  cohortId?: string;
+  programId?: string;
+  participantIds: string[]; // entrepreneurs/coaches involved
+  status?: "proposed" | "confirmed" | "alternatives_requested";
+  proposalId?: string;
+  prepLibraryItemIds?: string[];
+}
