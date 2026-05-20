@@ -34,7 +34,7 @@ export function PlannerCard({
   const coach = user.coachId ? getUser(user.coachId) : null;
   const tone = plannerStatusTone[status];
 
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `entrepreneur:${user.id}`,
     data: { kind: "entrepreneur", entrepreneurId: user.id, selectedIds: selected ? "multi" : "single" },
     disabled,
@@ -42,8 +42,10 @@ export function PlannerCard({
 
   const downPosRef = React.useRef<{ x: number; y: number } | null>(null);
 
+  // Bij gebruik van <DragOverlay> NIET de transform op de original card zetten —
+  // anders krijg je dubbele beweging waardoor de kaart buiten de scroll-container
+  // wordt geduwd en de backlog horizontaal meeswipet.
   const style: CSSProperties = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     opacity: isDragging ? 0.35 : 1,
     cursor: disabled ? "default" : isDragging ? "grabbing" : "grab",
     touchAction: "none",
