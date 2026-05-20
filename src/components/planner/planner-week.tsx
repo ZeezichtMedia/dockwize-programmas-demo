@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useDroppable } from "@dnd-kit/core";
+import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { ChevronLeft, ChevronRight, Clock, MapPin, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GradientAvatar } from "@/components/user-pill";
@@ -472,15 +472,44 @@ function SessionTile({
 }) {
   const ent = getUser(session.entrepreneurId);
   const coach = getUser(session.coachId);
+  const downPosRef = React.useRef<{ x: number; y: number } | null>(null);
+
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `session:${session.id}`,
+    data: { kind: "session", sessionId: session.id },
+    disabled: !onRemove, // read-only = niet versleepbaar
+  });
+
   if (!ent) return null;
 
   const isProposal = session.source === "proposal";
 
   return (
     <div
-      onClick={() => onOpen?.(session.id)}
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      data-session-id={session.id}
+      style={{
+        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+        opacity: isDragging ? 0.35 : 1,
+        touchAction: "none",
+      }}
+      onMouseDown={(e) => {
+        downPosRef.current = { x: e.clientX, y: e.clientY };
+      }}
+      onClick={(e) => {
+        const start = downPosRef.current;
+        downPosRef.current = null;
+        if (start) {
+          const dx = e.clientX - start.x;
+          const dy = e.clientY - start.y;
+          if (Math.hypot(dx, dy) >= 6) return;
+        }
+        onOpen?.(session.id);
+      }}
       className={cn(
-        "group relative cursor-pointer rounded-[6px] border bg-white p-1.5 shadow-sm transition-all hover:shadow-md",
+        "group relative cursor-grab rounded-[6px] border bg-white p-1.5 shadow-sm transition-all hover:shadow-md active:cursor-grabbing",
         isProposal
           ? "border-blue-300 bg-blue-50/80"
           : "border-[var(--color-accent)] bg-[var(--color-accent-soft)]/50"
@@ -507,6 +536,7 @@ function SessionTile({
             e.stopPropagation();
             onRemove(session.id);
           }}
+          onMouseDown={(e) => e.stopPropagation()}
           className="absolute -right-1 -top-1 hidden size-4 items-center justify-center rounded-full bg-[var(--color-ink)] text-white shadow-md group-hover:flex"
           aria-label="Verwijder"
         >

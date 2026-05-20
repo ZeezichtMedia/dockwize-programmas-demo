@@ -45,11 +45,100 @@ export function Planner() {
   const [detailEntrepreneurId, setDetailEntrepreneurId] = React.useState<string | null>(null);
   const [detailSessionId, setDetailSessionId] = React.useState<string | null>(null);
   const [planDialogFor, setPlanDialogFor] = React.useState<string | null>(null);
+  const shellRef = React.useRef<HTMLDivElement>(null);
+  const [marquee, setMarquee] = React.useState<{
+    startX: number;
+    startY: number;
+    currentX: number;
+    currentY: number;
+    additive: boolean;
+    initialSelection: Set<string>;
+  } | null>(null);
 
   React.useEffect(() => {
     setPlannedSessions(seedFromProposals(user.id, user.role));
     setSelectedIds(new Set());
   }, [user.id, user.role]);
+
+  // Marquee-rechthoek-selectie. Werkt vanaf de shell-root, behalve op
+  // interactieve elementen (kaart, knop, link, modal). Cmd/shift/ctrl =
+  // additief; anders vervangt de selectie.
+  React.useEffect(() => {
+    const shell = shellRef.current;
+    if (!shell) return;
+
+    function isInteractive(target: HTMLElement | null): boolean {
+      if (!target) return true;
+      if (target.closest("[data-planner-card]")) return true;
+      if (target.closest("button")) return true;
+      if (target.closest("a")) return true;
+      if (target.closest("input, textarea, select")) return true;
+      if (target.closest('[role="dialog"]')) return true;
+      return false;
+    }
+
+    let startX = 0;
+    let startY = 0;
+    let initial = new Set<string>();
+
+    function onMouseDown(e: MouseEvent) {
+      if (e.button !== 0) return;
+      if (isInteractive(e.target as HTMLElement)) return;
+      e.preventDefault();
+      const additive = e.shiftKey || e.metaKey || e.ctrlKey;
+      initial = additive ? new Set(selectedIds) : new Set();
+      if (!additive) setSelectedIds(new Set());
+      startX = e.clientX;
+      startY = e.clientY;
+      setMarquee({
+        startX,
+        startY,
+        currentX: e.clientX,
+        currentY: e.clientY,
+        additive,
+        initialSelection: initial,
+      });
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    }
+
+    function onMove(ev: MouseEvent) {
+      setMarquee((prev) => (prev ? { ...prev, currentX: ev.clientX, currentY: ev.clientY } : prev));
+      const cards = shell!.querySelectorAll<HTMLElement>("[data-planner-card]");
+      const rect = {
+        left: Math.min(ev.clientX, startX),
+        top: Math.min(ev.clientY, startY),
+        right: Math.max(ev.clientX, startX),
+        bottom: Math.max(ev.clientY, startY),
+      };
+      const hits: string[] = [];
+      cards.forEach((el) => {
+        const id = el.getAttribute("data-planner-card");
+        if (!id) return;
+        const r = el.getBoundingClientRect();
+        if (r.right >= rect.left && r.left <= rect.right && r.bottom >= rect.top && r.top <= rect.bottom) {
+          hits.push(id);
+        }
+      });
+      const next = new Set<string>(initial);
+      for (const h of hits) next.add(h);
+      setSelectedIds(next);
+    }
+
+    function onUp() {
+      setMarquee(null);
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    }
+
+    shell.addEventListener("mousedown", onMouseDown);
+    return () => {
+      shell.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -85,8 +174,23 @@ export function Planner() {
     if (!overData || overData.kind !== "slot") return;
 
     const activeId = String(e.active.id);
-    const draggedEntId = activeId.replace("entrepreneur:", "");
 
+    // Case 1: existing session being moved
+    if (activeId.startsWith("session:")) {
+      const sessionId = activeId.replace("session:", "");
+      setPlannedSessions((prev) =>
+        prev.map((s) => (s.id === sessionId ? { ...s, day: overData.day, hour: overData.hour } : s))
+      );
+      const moved = plannedSessions.find((s) => s.id === sessionId);
+      if (moved) {
+        setConfirmToast(`Verplaatst naar ${overData.day} ${overData.hour}:00`);
+        setTimeout(() => setConfirmToast(null), 2400);
+      }
+      return;
+    }
+
+    // Case 2: new entrepreneur card dropped
+    const draggedEntId = activeId.replace("entrepreneur:", "");
     const idsToPlace = selectedIds.has(draggedEntId)
       ? Array.from(selectedIds)
       : [draggedEntId];
@@ -173,9 +277,21 @@ export function Planner() {
     );
   }
 
+  const marqueeStyle = marquee
+    ? {
+        position: "fixed" as const,
+        left: Math.min(marquee.startX, marquee.currentX),
+        top: Math.min(marquee.startY, marquee.currentY),
+        width: Math.abs(marquee.currentX - marquee.startX),
+        height: Math.abs(marquee.currentY - marquee.startY),
+        pointerEvents: "none" as const,
+        zIndex: 100,
+      }
+    : null;
+
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex h-full overflow-hidden">
+      <div ref={shellRef} className="relative flex h-full overflow-hidden">
         <PlannerBacklog
           entrepreneurs={allEntrepreneurs}
           selectedIds={selectedIds}
@@ -199,6 +315,13 @@ export function Planner() {
           />
         </div>
       </div>
+
+      {marqueeStyle && (
+        <div
+          style={marqueeStyle}
+          className="rounded-[6px] border-2 border-[var(--color-ink)] bg-[var(--color-accent)]/15"
+        />
+      )}
 
       <DragOverlay dropAnimation={null}>
         {dragOverlayItems.length > 0 && <PlannerCardOverlay entrepreneurs={dragOverlayItems} />}

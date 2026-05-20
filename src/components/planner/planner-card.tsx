@@ -68,6 +68,7 @@ export function PlannerCard({
           const dy = e.clientY - start.y;
           if (Math.hypot(dx, dy) >= 6) return; // was een drag, niet een klik
         }
+        // Modifier-keys nemen voorrang op modal-open (multi-select pad)
         if ((e.metaKey || e.ctrlKey) && onSelectToggle) {
           e.preventDefault();
           onSelectToggle(user.id);
@@ -78,15 +79,9 @@ export function PlannerCard({
           (onSelectRange ?? onSelectToggle)?.(user.id);
           return;
         }
-        // Plain click: open detail-modal (heeft voorrang op selectie)
+        // Plain click: open detail-modal (geen preventDefault, ebgw-patroon)
         if (onOpenDetail) {
-          e.preventDefault();
           onOpenDetail(user.id);
-          return;
-        }
-        // Fallback: toggle als select-mode actief is
-        if (onSelectToggle && selected !== undefined) {
-          onSelectToggle(user.id);
         }
       }}
       className={cn(
