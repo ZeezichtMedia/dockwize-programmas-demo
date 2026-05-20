@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { LibraryCard } from "@/components/library-card";
+import { LibraryDetailModal } from "@/components/library-detail-modal";
 import { useUser } from "@/lib/auth-context";
-import { libraryByProgram } from "@/lib/mock/library";
+import { libraryByProgram, getLibraryItem } from "@/lib/mock/library";
 import { getCohort, getProgram } from "@/lib/mock/programs";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ export default function BibliotheekPage() {
   const [activeModule, setActiveModule] = React.useState<string | null>(null);
   const [activeType, setActiveType] = React.useState<string | null>(null);
   const [search, setSearch] = React.useState("");
+  const [openItemId, setOpenItemId] = React.useState<string | null>(null);
 
   const filtered = items.filter((i) => {
     if (activeModule && i.module !== activeModule) return false;
@@ -115,11 +117,17 @@ export default function BibliotheekPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((item) => (
-              <LibraryCard key={item.id} item={item} />
+              <LibraryCard key={item.id} item={item} onOpen={() => setOpenItemId(item.id)} />
             ))}
           </div>
         )}
       </div>
+
+      <LibraryDetailModal
+        open={!!openItemId}
+        onOpenChange={(o) => !o && setOpenItemId(null)}
+        item={openItemId ? getLibraryItem(openItemId) ?? null : null}
+      />
     </>
   );
 }

@@ -113,7 +113,7 @@ export function SessionProposalCard({ proposal }: SessionProposalCardProps) {
             className="mt-4"
           >
             <p className="text-[12.5px] font-medium text-[var(--color-ink)]">
-              {coach?.name.split(" ")[0]} stelt drie andere momenten voor:
+              {coach?.name.split(" ")[0]} stelt {proposal.alternativeSlots.length === 1 ? "nog een ander moment" : `${proposal.alternativeSlots.length} alternatieven`} voor:
             </p>
             <div className="mt-2 space-y-2">
               {proposal.alternativeSlots.map((slot) => (

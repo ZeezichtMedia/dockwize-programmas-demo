@@ -20,6 +20,9 @@ import {
 } from "@/components/ui/dialog";
 import { coaches, users } from "@/lib/mock/users";
 import { cohortsById, programsById } from "@/lib/mock/programs";
+import { plannerStatusFor } from "@/lib/mock/planner";
+import { EntrepreneurDetailModal } from "@/components/planner/entrepreneur-detail-modal";
+import { CreateWorkfolderWizard } from "@/components/create-workfolder-wizard";
 import { relativeTime, cn } from "@/lib/utils";
 import type { User } from "@/lib/types";
 
@@ -58,6 +61,8 @@ export default function AdminUsersPage() {
     Object.fromEntries(entrepreneurs.map((u) => [u.id, u.coachId ?? ""]))
   );
   const [assignDialogFor, setAssignDialogFor] = React.useState<string | null>(null);
+  const [detailFor, setDetailFor] = React.useState<string | null>(null);
+  const [wizardForPending, setWizardForPending] = React.useState<PendingUser | null>(null);
 
   const filtered = entrepreneurs.filter((u) => {
     if (!search) return true;
@@ -115,7 +120,7 @@ export default function AdminUsersPage() {
                     <Button variant="ghost" size="sm" className="text-orange-900 hover:bg-orange-100">
                       <ExternalLink className="size-3.5" /> HubSpot-record
                     </Button>
-                    <Button size="sm">
+                    <Button size="sm" onClick={() => setWizardForPending(p)}>
                       <UserPlus className="size-3.5" /> Werkmap aanmaken
                     </Button>
                   </div>
@@ -160,7 +165,8 @@ export default function AdminUsersPage() {
             return (
               <div
                 key={u.id}
-                className="grid grid-cols-[2fr_1.5fr_1fr_1.2fr_120px_60px] items-center gap-4 border-b border-[var(--color-border)] px-5 py-3.5 last:border-0 hover:bg-[var(--color-surface-2)]/60"
+                onClick={() => setDetailFor(u.id)}
+                className="grid cursor-pointer grid-cols-[2fr_1.5fr_1fr_1.2fr_120px_60px] items-center gap-4 border-b border-[var(--color-border)] px-5 py-3.5 last:border-0 transition-colors hover:bg-[var(--color-surface-2)]/60"
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <GradientAvatar
@@ -198,7 +204,10 @@ export default function AdminUsersPage() {
                 </div>
                 <div data-tour={idx === 0 ? "admin-coach-cell" : undefined}>
                   <button
-                    onClick={() => setAssignDialogFor(u.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setAssignDialogFor(u.id);
+                    }}
                     className="group flex items-center gap-2 rounded-[8px] px-1.5 py-0.5 transition-colors hover:bg-[var(--color-surface-2)]"
                   >
                     {coach ? (
@@ -216,7 +225,10 @@ export default function AdminUsersPage() {
                 </div>
                 <p className="text-[11px] text-[var(--color-ink-3)]">{relativeTime("2026-04-08T08:00:00Z")}</p>
                 <div className="flex items-center justify-end gap-1">
-                  <button className="rounded p-1.5 text-[var(--color-ink-3)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-ink)]">
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="rounded p-1.5 text-[var(--color-ink-3)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-ink)]"
+                  >
                     <MoreHorizontal className="size-3.5" />
                   </button>
                 </div>
@@ -234,6 +246,28 @@ export default function AdminUsersPage() {
           </p>
         </div>
       </div>
+
+      {/* Werkmap-aanmaak wizard (3 sessies vooraf) */}
+      <CreateWorkfolderWizard
+        open={!!wizardForPending}
+        onOpenChange={(o) => !o && setWizardForPending(null)}
+        pendingUser={wizardForPending}
+      />
+
+      {/* Ondernemer-detail modal */}
+      <EntrepreneurDetailModal
+        open={!!detailFor}
+        onOpenChange={(o) => !o && setDetailFor(null)}
+        entrepreneur={
+          detailFor
+            ? plannerStatusFor(entrepreneurs.find((u) => u.id === detailFor)!) ?? null
+            : null
+        }
+        onPlan={(id) => {
+          setDetailFor(null);
+          setAssignDialogFor(id);
+        }}
+      />
 
       {/* Coach assignment dialog */}
       <Dialog open={!!assignDialogFor} onOpenChange={(o) => !o && setAssignDialogFor(null)}>

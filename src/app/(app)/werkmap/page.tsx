@@ -36,6 +36,7 @@ import { SessionProposalCard } from "@/components/session-proposal-card";
 import { openProposalForEntrepreneur } from "@/lib/mock/sessions";
 import { TeamMembersCard } from "@/components/team-members-card";
 import { RequestOneOnOneDialog } from "@/components/quick-plan-dialog";
+import { DownloadWorkfolderDialog } from "@/components/download-workfolder-dialog";
 import { useUser } from "@/lib/auth-context";
 import { getFolderForEntrepreneur } from "@/lib/mock/workfolders";
 import { getUser } from "@/lib/mock/users";
@@ -79,6 +80,7 @@ export default function WerkmapPage() {
   const folders = Array.from(new Set(folder.files.map((f) => f.folder).filter(Boolean))) as string[];
   const openProposal = openProposalForEntrepreneur(user.id);
   const [requestOpen, setRequestOpen] = React.useState(false);
+  const [downloadOpen, setDownloadOpen] = React.useState(false);
 
   const filesShown = folder.files.filter((f) => {
     if (activeFolder && f.folder !== activeFolder) return false;
@@ -92,9 +94,14 @@ export default function WerkmapPage() {
         title="Mijn werkmap"
         subtitle={`${program.shortName} · ${cohort.name}`}
         action={
-          <Button size="sm">
-            <Upload className="size-4" /> Bestand uploaden
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="secondary" onClick={() => setDownloadOpen(true)}>
+              <Download className="size-4" /> Download
+            </Button>
+            <Button size="sm">
+              <Upload className="size-4" /> Bestand uploaden
+            </Button>
+          </div>
         }
       />
 
@@ -418,6 +425,11 @@ Voor Bram: vragen of hij me kan helpen met landing page conversion.`}
       </div>
 
       <RequestOneOnOneDialog open={requestOpen} onOpenChange={setRequestOpen} coach={coach} />
+      <DownloadWorkfolderDialog
+        open={downloadOpen}
+        onOpenChange={setDownloadOpen}
+        entrepreneurFirstName={user.name.split(" ")[0]}
+      />
     </>
   );
 }

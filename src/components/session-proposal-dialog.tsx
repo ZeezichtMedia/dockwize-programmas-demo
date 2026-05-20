@@ -63,7 +63,7 @@ export function SessionProposalDialog({ open, onOpenChange, entrepreneurName }: 
                 <CalendarPlus className="size-4" /> 1-op-1 voorstellen aan {entrepreneurName.split(" ")[0]}
               </DialogTitle>
               <DialogDescription>
-                Kies je voorkeursdatum. {entrepreneurName.split(" ")[0]} krijgt drie alternatieve momenten te zien
+                Kies je voorkeursdatum. {entrepreneurName.split(" ")[0]} krijgt twee alternatieve momenten te zien
                 als deze niet schikt.
               </DialogDescription>
             </DialogHeader>
@@ -132,7 +132,7 @@ export function SessionProposalDialog({ open, onOpenChange, entrepreneurName }: 
                 <Info className="mt-0.5 size-3.5 shrink-0 text-[var(--color-ink-3)]" />
                 <div className="text-[11.5px] text-[var(--color-ink-2)]">
                   <p>
-                    <strong className="text-[var(--color-ink)]">Volgende versie:</strong> we lezen je Outlook-agenda mee en stellen automatisch drie alternatieve slots voor.
+                    <strong className="text-[var(--color-ink)]">Volgende versie:</strong> we lezen je Outlook-agenda mee en stellen automatisch twee alternatieve slots voor.
                   </p>
                   <p className="mt-0.5 text-[var(--color-ink-3)]">
                     In deze demo worden de alternatieven uit een vaste template gehaald.

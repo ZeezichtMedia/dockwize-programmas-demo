@@ -84,7 +84,7 @@ export function QuickPlanDialog({
                   <CalendarPlus className="size-4" /> 1-op-1 plannen
                 </DialogTitle>
                 <DialogDescription>
-                  Kies een ondernemer en stel een moment voor. Past het niet, dan ziet de ondernemer drie alternatieven.
+                  Kies een ondernemer en stel een moment voor. Past het niet, dan ziet de ondernemer twee alternatieven.
                 </DialogDescription>
               </DialogHeader>
 
@@ -350,7 +350,7 @@ export function RequestOneOnOneDialog({ open, onOpenChange, coach }: RequestOneO
                 <div className="flex items-start gap-2 rounded-[10px] bg-[var(--color-surface-2)] p-3">
                   <Info className="mt-0.5 size-3.5 shrink-0 text-[var(--color-ink-3)]" />
                   <p className="text-[11.5px] text-[var(--color-ink-2)]">
-                    {coach.name.split(" ")[0]} krijgt een melding en stuurt je een datumvoorstel terug. Past dat niet, dan zie je drie alternatieven.
+                    {coach.name.split(" ")[0]} krijgt een melding en stuurt je een datumvoorstel terug. Past dat niet, dan zie je twee alternatieven.
                   </p>
                 </div>
               </div>

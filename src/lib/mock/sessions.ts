@@ -8,7 +8,6 @@ export const sessionProposals: SessionProposal[] = [
     primarySlot: "2026-05-12T14:00:00Z",
     alternativeSlots: [
       "2026-05-13T10:00:00Z",
-      "2026-05-14T15:30:00Z",
       "2026-05-15T09:00:00Z",
     ],
     durationMin: 45,
@@ -25,7 +24,6 @@ export const sessionProposals: SessionProposal[] = [
     primarySlot: "2026-05-13T13:00:00Z",
     alternativeSlots: [
       "2026-05-14T13:00:00Z",
-      "2026-05-15T11:00:00Z",
       "2026-05-18T14:00:00Z",
     ],
     durationMin: 60,
@@ -42,7 +40,6 @@ export const sessionProposals: SessionProposal[] = [
     primarySlot: "2026-05-11T16:00:00Z",
     alternativeSlots: [
       "2026-05-12T16:00:00Z",
-      "2026-05-13T11:30:00Z",
       "2026-05-14T15:00:00Z",
     ],
     durationMin: 30,
